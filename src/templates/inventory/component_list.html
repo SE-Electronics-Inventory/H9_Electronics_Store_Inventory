@@ -41,6 +41,43 @@
     .stat-card.low-stock .stat-number { color: var(--warning); }
     .stat-card.out-of-stock .stat-number { color: var(--danger); }
 
+    .search-filter-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .search-filter-form {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .search-input-wrapper {
+        flex: 2;
+        min-width: 240px;
+    }
+    .category-select-wrapper {
+        flex: 1;
+        min-width: 200px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: var(--text-main);
+        background-color: #ffffff;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
     .table-container {
         background: #ffffff;
         border: 1px solid var(--border-color);
@@ -122,7 +159,7 @@
             {% if is_low_stock_filter %}⚠️ Low-Stock Components{% else %}📦 Component Inventory{% endif %}
         </h1>
         <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
-            Real-time electronic component stock monitoring and availability records (ESIM-F-004)
+            Real-time electronic component stock monitoring and availability records (ESIM-F-004, ESIM-F-005)
         </p>
     </div>
     <div style="display: flex; gap: 0.5rem;">
@@ -130,6 +167,49 @@
             <a href="{% url 'inventory:add' %}" class="btn btn-primary">+ Add New Component</a>
         {% endif %}
     </div>
+</div>
+
+<!-- Search & Filter Bar (FR-05: #51, #52 / TC-SEARCH-01) -->
+<div class="search-filter-card">
+    <form method="get" action="{% url 'inventory:list' %}" class="search-filter-form">
+        <div class="search-input-wrapper">
+            <input type="text" 
+                   name="q" 
+                   id="search-input"
+                   value="{{ search_query }}" 
+                   placeholder="Search by ID or name..." 
+                   class="form-control"
+                   aria-label="Search by ID or name">
+        </div>
+        <div class="category-select-wrapper">
+            <select name="category" id="category-select" class="form-control" aria-label="Filter by category">
+                <option value="">All Categories</option>
+                {% for code, label in categories %}
+                    <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.25rem;">
+            🔍 Search & Filter
+        </button>
+        {% if is_filtered %}
+            <a href="{% url 'inventory:list' %}" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid var(--border-color); padding: 0.6rem 1rem;">
+                ✕ Clear
+            </a>
+        {% endif %}
+    </form>
+    {% if is_filtered %}
+        <div style="margin-top: 0.75rem; font-size: 0.875rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
+            <span>Filtered results for:</span>
+            {% if search_query %}
+                <span class="badge-category">Query: <strong>"{{ search_query }}"</strong></span>
+            {% endif %}
+            {% if selected_category %}
+                <span class="badge-category">Category: <strong>"{{ selected_category }}"</strong></span>
+            {% endif %}
+            <span>({{ total_components }} match{{ total_components|pluralize:"es" }})</span>
+        </div>
+    {% endif %}
 </div>
 
 {% if not is_low_stock_filter and total_components %}
@@ -207,7 +287,12 @@
                 <td colspan="7">
                     <div class="empty-state">
                         <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">No components found</h3>
-                        <p>No active electronic components are currently recorded in the inventory database.</p>
+                        {% if is_filtered %}
+                            <p style="margin-bottom: 1rem;">No components match your search and filter criteria. Try adjusting your query or category.</p>
+                            <a href="{% url 'inventory:list' %}" class="btn btn-sm btn-primary">Clear Filters</a>
+                        {% else %}
+                            <p>No active electronic components are currently recorded in the inventory database.</p>
+                        {% endif %}
                     </div>
                 </td>
             </tr>
