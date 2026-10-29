@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Component Inventory - ESIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .inventory-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .stat-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .stat-card h4 {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.35rem;
+        letter-spacing: 0.5px;
+    }
+    .stat-card .stat-number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    .stat-card.in-stock .stat-number { color: var(--success); }
+    .stat-card.low-stock .stat-number { color: var(--warning); }
+    .stat-card.out-of-stock .stat-number { color: var(--danger); }
+
+    .table-container {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow-x: auto;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    table.inventory-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.95rem;
+    }
+    table.inventory-table th {
+        background-color: #f1f5f9;
+        color: #334155;
+        font-weight: 600;
+        padding: 0.85rem 1rem;
+        border-bottom: 2px solid var(--border-color);
+        white-space: nowrap;
+    }
+    table.inventory-table td {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    table.inventory-table tr:hover {
+        background-color: #f8fafc;
+    }
+    .badge-status {
+        display: inline-block;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 9999px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .badge-in-stock {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+    .badge-low-stock {
+        background-color: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+    .badge-out-of-stock {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+    .badge-category {
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+    .component-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-weight: 600;
+        color: var(--primary);
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inventory-header">
+    <div>
+        <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-main);">
+            {% if is_low_stock_filter %}⚠️ Low-Stock Components{% else %}📦 Component Inventory{% endif %}
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+            Real-time electronic component stock monitoring and availability records (ESIM-F-004)
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+        {% if user.is_authenticated and user.is_staff or user.role == 'ADMIN' %}
+            <a href="{% url 'inventory:add' %}" class="btn btn-primary">+ Add New Component</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if not is_low_stock_filter and total_components %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <h4>Total Items</h4>
+        <div class="stat-number">{{ total_components }}</div>
+    </div>
+    <div class="stat-card in-stock">
+        <h4>In Stock</h4>
+        <div class="stat-number">{{ in_stock_count }}</div>
+    </div>
+    <div class="stat-card low-stock">
+        <h4>Low Stock Alert</h4>
+        <div class="stat-number">{{ low_stock_count }}</div>
+    </div>
+    <div class="stat-card out-of-stock">
+        <h4>Out of Stock</h4>
+        <div class="stat-number">{{ out_of_stock_count }}</div>
+    </div>
+</div>
+{% endif %}
+
+<div class="table-container">
+    <table class="inventory-table">
+        <thead>
+            <tr>
+                <th>Component ID</th>
+                <th>Component Name</th>
+                <th>Category</th>
+                <th style="text-align: right;">Unit Price</th>
+                <th style="text-align: center;">In Stock</th>
+                <th style="text-align: center;">Min Level</th>
+                <th style="text-align: center;">Availability</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comp in components %}
+            <tr>
+                <td>
+                    <span class="component-code">{{ comp.component_id }}</span>
+                </td>
+                <td>
+                    <strong>{{ comp.name }}</strong>
+                    {% if comp.description %}
+                        <div style="font-size: 0.8rem; color: var(--text-muted); max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            {{ comp.description }}
+                        </div>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge-category">{{ comp.get_category_display }}</span>
+                </td>
+                <td style="text-align: right; font-weight: 500;">
+                    ₹{{ comp.price }}
+                </td>
+                <td style="text-align: center; font-weight: 600;">
+                    {{ comp.quantity }}
+                </td>
+                <td style="text-align: center; color: var(--text-muted);">
+                    {{ comp.minimum_stock }}
+                </td>
+                <td style="text-align: center;">
+                    {% if comp.availability == "In Stock" %}
+                        <span class="badge-status badge-in-stock">● In Stock</span>
+                    {% elif comp.availability == "Low Stock" %}
+                        <span class="badge-status badge-low-stock">▲ Low Stock</span>
+                    {% else %}
+                        <span class="badge-status badge-out-of-stock">✖ Out of Stock</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">No components found</h3>
+                        <p>No active electronic components are currently recorded in the inventory database.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

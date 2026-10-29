@@ -1,3 +1,149 @@
-from django.test import TestCase
+"""
+Tests for Component Inventory (ESIM-F-004: TC-INV-02, ESIM-F-008: TC-AVAIL-01)
+"""
+from django.test import TestCase, Client
+from django.urls import reverse
+from decimal import Decimal
+from .models import Component
 
-# Create your tests here.
+
+class ComponentModelTests(TestCase):
+    """Unit tests for Component model behavior and availability calculation."""
+
+    def test_availability_calculation_rules(self):
+        """
+        TC-AVAIL-01: Availability matches the documented rule for quantities:
+        - above minimum_stock -> In Stock
+        - equal to minimum_stock -> Low Stock
+        - below minimum_stock but > 0 -> Low Stock
+        - equal to 0 -> Out of Stock
+        """
+        in_stock_item = Component.objects.create(
+            component_id="TEST-001",
+            name="In Stock Component",
+            category="Passives",
+            price=Decimal("10.00"),
+            quantity=25,
+            minimum_stock=10,
+        )
+        self.assertEqual(in_stock_item.availability, "In Stock")
+        self.assertFalse(in_stock_item.is_low_stock)
+
+        at_min_item = Component.objects.create(
+            component_id="TEST-002",
+            name="At Minimum Component",
+            category="Sensors",
+            price=Decimal("50.00"),
+            quantity=10,
+            minimum_stock=10,
+        )
+        self.assertEqual(at_min_item.availability, "Low Stock")
+        self.assertTrue(at_min_item.is_low_stock)
+
+        below_min_item = Component.objects.create(
+            component_id="TEST-003",
+            name="Below Minimum Component",
+            category="Sensors",
+            price=Decimal("50.00"),
+            quantity=5,
+            minimum_stock=10,
+        )
+        self.assertEqual(below_min_item.availability, "Low Stock")
+        self.assertTrue(below_min_item.is_low_stock)
+
+        out_of_stock_item = Component.objects.create(
+            component_id="TEST-004",
+            name="Out of Stock Component",
+            category="Power",
+            price=Decimal("150.00"),
+            quantity=0,
+            minimum_stock=5,
+        )
+        self.assertEqual(out_of_stock_item.availability, "Out of Stock")
+        self.assertTrue(out_of_stock_item.is_low_stock)
+
+    def test_component_string_representation(self):
+        """Verifies readable string output of Component instance."""
+        comp = Component.objects.create(
+            component_id="RES-01",
+            name="100 Ohm Resistor",
+            price=Decimal("1.50"),
+            quantity=20,
+            minimum_stock=5,
+        )
+        self.assertIn("RES-01", str(comp))
+        self.assertIn("100 Ohm Resistor", str(comp))
+
+
+class InventoryListViewTests(TestCase):
+    """Integration & view tests for FR-04: View Component Inventory."""
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("inventory:list")
+
+        # Create components matching TC-INV-02 dataset
+        self.comp1 = Component.objects.create(
+            component_id="CMP-101",
+            name="Microcontroller ATmega328P",
+            category="Microcontrollers",
+            description="8-bit AVR microcontroller",
+            price=Decimal("180.00"),
+            quantity=15,
+            minimum_stock=5,
+        )
+        self.comp2 = Component.objects.create(
+            component_id="CMP-102",
+            name="Ultrasonic Sensor HC-SR04",
+            category="Sensors",
+            description="Distance sensor module",
+            price=Decimal("75.50"),
+            quantity=3,
+            minimum_stock=10,
+        )
+        self.inactive_comp = Component.objects.create(
+            component_id="CMP-999",
+            name="Deactivated Old Component",
+            price=Decimal("5.00"),
+            quantity=10,
+            minimum_stock=5,
+            is_active=False,
+        )
+
+    def test_view_status_code_and_template(self):
+        """Inventory list endpoint returns 200 OK and uses the proper template."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "inventory/component_list.html")
+        self.assertTemplateUsed(response, "base.html")
+
+    def test_all_stored_components_displayed(self):
+        """
+        TC-INV-02: Every active component in the database is retrievable and displayed.
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        # Check content contains component details
+        self.assertContains(response, "CMP-101")
+        self.assertContains(response, "Microcontroller ATmega328P")
+        self.assertContains(response, "180.00")
+        self.assertContains(response, "15")
+        self.assertContains(response, "In Stock")
+
+        self.assertContains(response, "CMP-102")
+        self.assertContains(response, "Ultrasonic Sensor HC-SR04")
+        self.assertContains(response, "75.50")
+        self.assertContains(response, "3")
+        self.assertContains(response, "Low Stock")
+
+        # Inactive components should be excluded from active inventory list
+        self.assertNotContains(response, "CMP-999")
+        self.assertNotContains(response, "Deactivated Old Component")
+
+    def test_empty_inventory_message(self):
+        """When no components exist, clear feedback message is displayed."""
+        Component.objects.all().delete()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No components found")
