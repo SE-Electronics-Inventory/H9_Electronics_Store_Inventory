@@ -2,7 +2,17 @@
 Inventory Views (FR-03 to FR-09, FR-12, FR-13)
 """
 from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+from django.shortcuts import redirect
+from .forms import ComponentForm
 from .models import Component
+
+
+def is_inventory_administrator(user):
+    """Only members of the inventory-administrator group may change stock."""
+    return user.groups.filter(name="Inventory Administrator").exists()
 
 
 def component_list(request):
@@ -29,10 +39,24 @@ def component_list(request):
     return render(request, "inventory/component_list.html", context)
 
 
+@login_required
 def component_add(request):
     """Add a new electronic component (FR-03, FR-12)."""
-    return render(request, "base.html", {
+    if not is_inventory_administrator(request.user):
+        return HttpResponseForbidden("Inventory Administrator access is required.")
+
+    if request.method == "POST":
+        form = ComponentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Component added successfully.")
+            return redirect("inventory:list")
+    else:
+        form = ComponentForm()
+
+    return render(request, "inventory/component_form.html", {
         "page_title": "Add Component",
+        "form": form,
     })
 
 

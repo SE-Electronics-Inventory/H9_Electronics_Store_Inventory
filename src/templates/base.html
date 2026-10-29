@@ -210,8 +210,14 @@
                 <li><a href="{% url 'inventory:list' %}" class="nav-link">Inventory</a></li>
                 <li><a href="{% url 'reports:dashboard' %}" class="nav-link">Dashboard</a></li>
                 <li><a href="{% url 'reports:report_list' %}" class="nav-link">Reports</a></li>
-                {% if user.is_authenticated and user.is_staff or user.role == 'ADMIN' %}
+                {% if user.is_authenticated %}
+                    {% for group in user.groups.all %}
+                        {% if group.name == 'Inventory Administrator' %}
                     <li><a href="{% url 'inventory:add' %}" class="nav-link">+ Add Component</a></li>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if user.is_authenticated and user.is_staff %}
                     <li><a href="{% url 'audit:log_list' %}" class="nav-link">Audit Trail</a></li>
                 {% endif %}
             </ul>
@@ -219,7 +225,7 @@
         <div class="user-nav">
             {% if user.is_authenticated %}
                 <span>Hello, <strong>{{ user.get_short_name|default:user.username }}</strong></span>
-                <span class="user-badge">{{ user.profile.role|default:"User" }}</span>
+                <span class="user-badge">{{ user.groups.first.name|default:"User" }}</span>
                 <form action="{% url 'accounts:logout' %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
