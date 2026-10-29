@@ -72,6 +72,20 @@ class Component(models.Model):
         ordering = ["component_id"]
         verbose_name = "Component"
         verbose_name_plural = "Components"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(price__gte=Decimal("0.00")),
+                name="component_price_non_negative",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(quantity__gte=0),
+                name="component_quantity_non_negative",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(minimum_stock__gte=0),
+                name="component_minimum_stock_non_negative",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.component_id} - {self.name} ({self.quantity} in stock)"

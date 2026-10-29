@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Deactivate Component - ESIMS{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Deactivate Component</h1>
+    <p>Deactivate <strong>{{ component.component_id }}</strong> - {{ component.name }}?</p>
+    <form method="post" style="margin-top: 1rem;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Deactivate</button>
+        <a href="{% url 'inventory:list' %}" class="btn">Cancel</a>
+    </form>
+</div>
+{% endblock %}
