@@ -1,7 +1,11 @@
 """
 Inventory Views (FR-03 to FR-09, FR-12, FR-13)
 """
-from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
+from django.db import IntegrityError
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import ComponentForm
 from .models import Component
 
 
@@ -31,22 +35,52 @@ def component_list(request):
 
 def component_add(request):
     """Add a new electronic component (FR-03, FR-12)."""
-    return render(request, "base.html", {
+    form = ComponentForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            form.save()
+        except IntegrityError:
+            form.add_error("component_id", "A component with this ID already exists.")
+        else:
+            messages.success(request, "Component added successfully.")
+            return redirect("inventory:list")
+    return render(request, "inventory/component_form.html", {
+        "form": form,
         "page_title": "Add Component",
+        "submit_label": "Add Component",
     })
 
 
 def component_edit(request, pk):
     """Update component details and stock (FR-06)."""
-    return render(request, "base.html", {
+    component = get_object_or_404(Component, pk=pk)
+    form = ComponentForm(request.POST or None, instance=component)
+    if request.method == "POST" and form.is_valid():
+        try:
+            form.save()
+        except IntegrityError:
+            form.add_error("component_id", "A component with this ID already exists.")
+        else:
+            messages.success(request, "Component updated successfully.")
+            return redirect("inventory:list")
+    return render(request, "inventory/component_form.html", {
+        "form": form,
+        "component": component,
         "page_title": "Edit Component",
+        "submit_label": "Save Changes",
     })
 
 
 def component_delete(request, pk):
     """Delete or deactivate component with confirmation (FR-07)."""
-    return render(request, "base.html", {
-        "page_title": "Delete Component",
+    component = get_object_or_404(Component, pk=pk)
+    if request.method == "POST":
+        component.is_active = False
+        component.save(update_fields=["is_active", "updated_at"])
+        messages.success(request, "Component deactivated successfully.")
+        return redirect("inventory:list")
+    return render(request, "inventory/component_confirm_delete.html", {
+        "component": component,
     })
 
 
