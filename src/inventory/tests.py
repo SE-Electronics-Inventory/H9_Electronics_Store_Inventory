@@ -4,6 +4,7 @@ Tests for Component Inventory (ESIM-F-004: TC-INV-02, ESIM-F-008: TC-AVAIL-01)
 from django.test import TestCase, Client
 from django.urls import reverse
 from decimal import Decimal
+from .forms import ComponentForm
 from .models import Component
 
 
@@ -147,3 +148,117 @@ class InventoryListViewTests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No components found")
+
+
+class InventoryPersistenceAndValidationTests(TestCase):
+    """TC-DATA-01 and TC-VAL-01 for database-backed inventory writes."""
+
+    def valid_data(self, **overrides):
+        data = {
+            "component_id": "PERSIST-001",
+            "name": "Persistent Sensor",
+            "category": "Sensors",
+            "description": "Stored in the inventory database",
+            "price": "125.50",
+            "quantity": "12",
+            "minimum_stock": "3",
+            "is_active": "on",
+        }
+        data.update(overrides)
+        return data
+
+    def test_valid_component_is_saved_and_retrieved_from_database(self):
+        response = self.client.post(
+            reverse("inventory:add"), data=self.valid_data()
+        )
+
+        self.assertRedirects(response, reverse("inventory:list"))
+        self.assertTrue(Component.objects.filter(component_id="PERSIST-001").exists())
+
+        response = self.client.get(reverse("inventory:list"))
+        self.assertContains(response, "PERSIST-001")
+        self.assertContains(response, "Persistent Sensor")
+
+    def test_component_update_is_saved_and_retrieved_from_database(self):
+        component = Component.objects.create(
+            component_id="PERSIST-001",
+            name="Original Sensor",
+            price=Decimal("100.00"),
+            quantity=4,
+        )
+
+        response = self.client.post(
+            reverse("inventory:edit", args=[component.pk]),
+            data=self.valid_data(name="Updated Sensor", quantity="15"),
+        )
+
+        self.assertRedirects(response, reverse("inventory:list"))
+        component.refresh_from_db()
+        self.assertEqual(component.name, "Updated Sensor")
+        self.assertEqual(component.quantity, 15)
+
+    def test_missing_mandatory_fields_are_rejected_without_persisting(self):
+        form = ComponentForm(
+            self.valid_data(component_id="", name="", price="")
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("component_id", form.errors)
+        self.assertIn("name", form.errors)
+        self.assertIn("price", form.errors)
+        self.assertEqual(Component.objects.count(), 0)
+
+    def test_duplicate_component_id_is_rejected_without_persisting(self):
+        Component.objects.create(
+            component_id="PERSIST-001",
+            name="Existing Component",
+            price=Decimal("10.00"),
+        )
+
+        response = self.client.post(
+            reverse("inventory:add"), data=self.valid_data()
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("component_id", response.context["form"].errors)
+        self.assertEqual(Component.objects.count(), 1)
+
+    def test_negative_quantity_is_rejected_without_persisting(self):
+        response = self.client.post(
+            reverse("inventory:add"), data=self.valid_data(quantity="-1")
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("quantity", response.context["form"].errors)
+        self.assertFalse(Component.objects.exists())
+
+    def test_invalid_prices_are_rejected_without_persisting(self):
+        for price in ("-1.00", "not-a-price"):
+            with self.subTest(price=price):
+                response = self.client.post(
+                    reverse("inventory:add"), data=self.valid_data(price=price)
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("price", response.context["form"].errors)
+                self.assertFalse(Component.objects.exists())
+
+    def test_invalid_update_does_not_change_existing_record(self):
+        component = Component.objects.create(
+            component_id="PERSIST-001",
+            name="Existing Component",
+            price=Decimal("10.00"),
+            quantity=5,
+        )
+
+        response = self.client.post(
+            reverse("inventory:edit", args=[component.pk]),
+            data=self.valid_data(component_id="", quantity="-5", price="-1"),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        component.refresh_from_db()
+        self.assertEqual(component.component_id, "PERSIST-001")
+        self.assertEqual(component.name, "Existing Component")
+        self.assertEqual(component.price, Decimal("10.00"))
+        self.assertEqual(component.quantity, 5)
