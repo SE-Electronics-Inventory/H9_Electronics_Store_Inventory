@@ -3,6 +3,7 @@ Inventory Views (FR-03 to FR-09, FR-12, FR-13)
 """
 from django.contrib import messages
 from django.db import IntegrityError
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ComponentForm
@@ -11,10 +12,26 @@ from .models import Component
 
 def component_list(request):
     """
-    View component inventory list (ESIM-F-004 / TC-INV-02).
+    View component inventory list with search and filter capabilities (FR-04, FR-05 / TC-SEARCH-01).
     Displays stored component records with details and real-time availability status.
+    Supports searching by component ID or name, and filtering by category.
     """
-    components = Component.objects.filter(is_active=True).order_by("component_id")
+    query = request.GET.get("q", "").strip()
+    selected_category = request.GET.get("category", "").strip()
+
+    components = Component.objects.filter(is_active=True)
+
+    # FR-05 (#51): Search by ID or name (case-insensitive substring match)
+    if query:
+        components = components.filter(
+            Q(component_id__icontains=query) | Q(name__icontains=query)
+        )
+
+    # FR-05 (#52): Filter by category
+    if selected_category:
+        components = components.filter(category=selected_category)
+
+    components = components.order_by("component_id")
 
     # Metrics for quick inventory status overview
     total_components = components.count()
@@ -29,6 +46,10 @@ def component_list(request):
         "in_stock_count": in_stock_count,
         "low_stock_count": low_stock_count,
         "out_of_stock_count": out_of_stock_count,
+        "search_query": query,
+        "selected_category": selected_category,
+        "categories": Component.CATEGORY_CHOICES,
+        "is_filtered": bool(query or selected_category),
     }
     return render(request, "inventory/component_list.html", context)
 

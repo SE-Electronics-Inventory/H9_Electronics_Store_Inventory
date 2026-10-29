@@ -262,3 +262,111 @@ class InventoryPersistenceAndValidationTests(TestCase):
         self.assertEqual(component.name, "Existing Component")
         self.assertEqual(component.price, Decimal("10.00"))
         self.assertEqual(component.quantity, 5)
+
+
+class SearchAndFilterTests(TestCase):
+    """
+    Test suite for FR-05: Search and Filter Components (ESIM-F-005 / TC-SEARCH-01).
+    Covers User Story #51 (search by ID or name) and User Story #52 (filter by category).
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("inventory:list")
+
+        self.c1 = Component.objects.create(
+            component_id="ESP32-WROOM",
+            name="ESP32 Wi-Fi Bluetooth Module",
+            category="Microcontrollers",
+            price=Decimal("350.00"),
+            quantity=20,
+            minimum_stock=5,
+        )
+        self.c2 = Component.objects.create(
+            component_id="ARD-NANO",
+            name="Arduino Nano V3",
+            category="Microcontrollers",
+            price=Decimal("250.00"),
+            quantity=15,
+            minimum_stock=5,
+        )
+        self.c3 = Component.objects.create(
+            component_id="SEN-DHT22",
+            name="DHT22 High-Accuracy Temp Sensor",
+            category="Sensors",
+            price=Decimal("180.00"),
+            quantity=8,
+            minimum_stock=10,
+        )
+        self.c4 = Component.objects.create(
+            component_id="RES-10K",
+            name="10k Ohm Resistor Pack",
+            category="Passives",
+            price=Decimal("25.00"),
+            quantity=100,
+            minimum_stock=20,
+        )
+        self.c_inactive = Component.objects.create(
+            component_id="SEN-OLD-01",
+            name="Old Deactivated Sensor",
+            category="Sensors",
+            price=Decimal("50.00"),
+            quantity=5,
+            is_active=False,
+        )
+
+    def test_search_by_component_id(self):
+        """User Story #51: Typing an ID shows only matching components (case-insensitive)."""
+        response = self.client.get(self.url, {"q": "esp32"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ESP32-WROOM")
+        self.assertNotContains(response, "ARD-NANO")
+        self.assertNotContains(response, "SEN-DHT22")
+        self.assertNotContains(response, "RES-10K")
+
+    def test_search_by_component_name(self):
+        """User Story #51: Typing a name shows only matching components."""
+        response = self.client.get(self.url, {"q": "resistor"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "RES-10K")
+        self.assertContains(response, "10k Ohm Resistor Pack")
+        self.assertNotContains(response, "ESP32-WROOM")
+        self.assertNotContains(response, "ARD-NANO")
+
+    def test_filter_by_category(self):
+        """User Story #52: Choosing a category shows only that category."""
+        response = self.client.get(self.url, {"category": "Microcontrollers"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ESP32-WROOM")
+        self.assertContains(response, "ARD-NANO")
+        self.assertNotContains(response, "SEN-DHT22")
+        self.assertNotContains(response, "RES-10K")
+
+    def test_search_and_category_filter_combined(self):
+        """TC-SEARCH-01: ID/name search and category filter work together."""
+        # Search for 'nano' in 'Microcontrollers'
+        response = self.client.get(self.url, {"q": "nano", "category": "Microcontrollers"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ARD-NANO")
+        self.assertNotContains(response, "ESP32-WROOM")
+        self.assertNotContains(response, "SEN-DHT22")
+
+        # Search for 'nano' in 'Sensors' -> no match
+        response_empty = self.client.get(self.url, {"q": "nano", "category": "Sensors"})
+        self.assertEqual(response_empty.status_code, 200)
+        self.assertContains(response_empty, "No components found")
+        self.assertNotContains(response_empty, "ARD-NANO")
+
+    def test_no_match_shows_no_components_found(self):
+        """TC-SEARCH-01 / #52: If nothing matches, 'No components found' is shown."""
+        response = self.client.get(self.url, {"q": "NonExistentPartXYZ"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No components found")
+        self.assertEqual(response.context["total_components"], 0)
+
+    def test_inactive_components_excluded_from_search(self):
+        """Deactivated components are excluded from search results."""
+        response = self.client.get(self.url, {"q": "Deactivated"})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "SEN-OLD-01")
+        self.assertContains(response, "No components found")
