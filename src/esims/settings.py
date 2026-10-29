@@ -42,6 +42,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # FR-01 / SR-01: every page needs login unless marked @login_not_required
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -118,5 +120,11 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "inventory:list"
 LOGOUT_REDIRECT_URL = "accounts:login"
+
+# Session settings (FR-01)
+SESSION_COOKIE_AGE = 60 * 30  # log out after 30 minutes of no activity
+SESSION_SAVE_EVERY_REQUEST = True  # each request resets the 30-minute timer
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
