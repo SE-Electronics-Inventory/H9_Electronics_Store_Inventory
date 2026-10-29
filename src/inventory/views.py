@@ -5,8 +5,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.db.models import Q
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+
+from accounts.roles import admin_required, has_role, ADMIN
 
 from .forms import ComponentForm
 from .models import Component
@@ -57,16 +58,14 @@ def component_list(request):
 
 
 def is_inventory_administrator(user):
-    """Only members of the inventory-administrator group may add components."""
-    return user.groups.filter(name="Inventory Administrator").exists()
+    """Only members of the inventory-administrator group may change inventory (FR-14)."""
+    return has_role(user, ADMIN)
 
 
 @login_required
+@admin_required  # FR-14: Staff and Manager get the Access-denied page
 def component_add(request):
     """Add a new electronic component (FR-03, FR-12)."""
-    if not is_inventory_administrator(request.user):
-        return HttpResponseForbidden("Inventory Administrator access is required.")
-
     form = ComponentForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
@@ -83,6 +82,7 @@ def component_add(request):
     })
 
 
+@admin_required  # FR-14
 def component_edit(request, pk):
     """Update component details and stock (FR-06)."""
     component = get_object_or_404(Component, pk=pk)
@@ -103,6 +103,7 @@ def component_edit(request, pk):
     })
 
 
+@admin_required  # FR-14
 def component_delete(request, pk):
     """Delete or deactivate component with confirmation (FR-07)."""
     component = get_object_or_404(Component, pk=pk)

@@ -83,6 +83,9 @@ class InventoryListViewTests(TestCase):
 
     def setUp(self):
         self.client = Client()
+        # Inventory pages need a logged-in user (FR-01)
+        self.user = get_user_model().objects.create_user(username="tester", password="Test@12345")
+        self.client.force_login(self.user)
         self.url = reverse("inventory:list")
 
         # Create components matching TC-INV-02 dataset
@@ -285,6 +288,9 @@ class SearchAndFilterTests(TestCase):
 
     def setUp(self):
         self.client = Client()
+        # Inventory pages need a logged-in user (FR-01)
+        self.user = get_user_model().objects.create_user(username="tester", password="Test@12345")
+        self.client.force_login(self.user)
         self.url = reverse("inventory:list")
 
         self.c1 = Component.objects.create(
