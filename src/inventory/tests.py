@@ -3,6 +3,8 @@ Tests for Component Inventory (ESIM-F-004: TC-INV-02, ESIM-F-008: TC-AVAIL-01)
 """
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from decimal import Decimal
 from .forms import ComponentForm
 from .models import Component
@@ -152,6 +154,17 @@ class InventoryListViewTests(TestCase):
 
 class InventoryPersistenceAndValidationTests(TestCase):
     """TC-DATA-01 and TC-VAL-01 for database-backed inventory writes."""
+
+    def setUp(self):
+        self.admin_group, _ = Group.objects.get_or_create(
+            name="Inventory Administrator"
+        )
+        self.admin = get_user_model().objects.create_user(
+            username="persistence-admin",
+            password="test-password-123",
+        )
+        self.admin.groups.add(self.admin_group)
+        self.client.force_login(self.admin)
 
     def valid_data(self, **overrides):
         data = {
@@ -370,3 +383,74 @@ class SearchAndFilterTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "SEN-OLD-01")
         self.assertContains(response, "No components found")
+
+
+class ComponentAddAuthorizationTests(TestCase):
+    def setUp(self):
+        self.url = reverse("inventory:add")
+        self.admin_group, _ = Group.objects.get_or_create(
+            name="Inventory Administrator"
+        )
+        self.admin = get_user_model().objects.create_user(
+            username="inventory-admin",
+            password="test-password-123",
+        )
+        self.admin.groups.add(self.admin_group)
+
+    def valid_data(self, **overrides):
+        data = {
+            "component_id": "NEW-001",
+            "name": "New Sensor",
+            "category": "Sensors",
+            "description": "Temperature sensor",
+            "price": "12.50",
+            "quantity": "8",
+            "minimum_stock": "3",
+            "is_active": "on",
+        }
+        data.update(overrides)
+        return data
+
+    def test_inventory_administrator_can_add_component(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.post(self.url, self.valid_data())
+
+        self.assertRedirects(response, reverse("inventory:list"))
+        component = Component.objects.get(component_id="NEW-001")
+        self.assertEqual(component.name, "New Sensor")
+        self.assertEqual(component.price, Decimal("12.50"))
+        self.assertEqual(component.quantity, 8)
+        self.assertTrue(component.is_active)
+
+    def test_invalid_component_is_not_saved(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            self.url,
+            self.valid_data(price="-1.00", quantity="-2"),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Component.objects.count(), 0)
+        self.assertIn("price", response.context["form"].errors)
+        self.assertIn("quantity", response.context["form"].errors)
+
+    def test_add_requires_login(self):
+        response = self.client.get(self.url)
+
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={self.url}",
+        )
+
+    def test_add_is_forbidden_for_users_outside_admin_group(self):
+        regular_user = get_user_model().objects.create_user(
+            username="regular-user",
+            password="test-password-123",
+        )
+        self.client.force_login(regular_user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)

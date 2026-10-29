@@ -20,6 +20,9 @@ class ComponentForm(forms.ModelForm):
         ]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 3}),
+            "price": forms.NumberInput(attrs={"min": "0", "step": "0.01"}),
+            "quantity": forms.NumberInput(attrs={"min": "0", "step": "1"}),
+            "minimum_stock": forms.NumberInput(attrs={"min": "0", "step": "1"}),
         }
 
     def clean_component_id(self):

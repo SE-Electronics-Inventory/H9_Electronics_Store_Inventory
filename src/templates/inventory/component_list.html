@@ -163,8 +163,12 @@
         </p>
     </div>
     <div style="display: flex; gap: 0.5rem;">
-        {% if user.is_authenticated and user.is_staff or user.role == 'ADMIN' %}
-            <a href="{% url 'inventory:add' %}" class="btn btn-primary">+ Add New Component</a>
+        {% if user.is_authenticated %}
+            {% for group in user.groups.all %}
+                {% if group.name == 'Inventory Administrator' %}
+                    <a href="{% url 'inventory:add' %}" class="btn btn-primary">+ Add New Component</a>
+                {% endif %}
+            {% endfor %}
         {% endif %}
     </div>
 </div>
@@ -173,11 +177,11 @@
 <div class="search-filter-card">
     <form method="get" action="{% url 'inventory:list' %}" class="search-filter-form">
         <div class="search-input-wrapper">
-            <input type="text" 
-                   name="q" 
+            <input type="text"
+                   name="q"
                    id="search-input"
-                   value="{{ search_query }}" 
-                   placeholder="Search by ID or name..." 
+                   value="{{ search_query }}"
+                   placeholder="Search by ID or name..."
                    class="form-control"
                    aria-label="Search by ID or name">
         </div>
