@@ -4,7 +4,7 @@ Inventory Views (FR-03 to FR-09, FR-12, FR-13)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.roles import admin_required, has_role, ADMIN
@@ -119,9 +119,11 @@ def component_delete(request, pk):
 
 def low_stock_list(request):
     """Identify low-stock components (FR-09)."""
-    components = [c for c in Component.objects.filter(is_active=True) if c.is_low_stock]
-    return render(request, "inventory/component_list.html", {
+    components = Component.objects.filter(
+        is_active=True,
+        quantity__lte=F("minimum_stock"),
+    ).order_by("component_id")
+    return render(request, "inventory/low_stock_list.html", {
         "page_title": "Low-Stock Components",
         "components": components,
-        "is_low_stock_filter": True,
     })
