@@ -17,3 +17,6 @@ urlpatterns = [
     path("audit/", include("audit.urls")),
     path("", RedirectView.as_view(url="/inventory/", permanent=False), name="home"),
 ]
+
+handler404 = "esims.views.page_not_found"
+handler500 = "esims.views.server_error"

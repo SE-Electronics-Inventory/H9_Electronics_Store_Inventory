@@ -3,7 +3,7 @@ Inventory Views (FR-03 to FR-09, FR-12, FR-13)
 """
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.db import DatabaseError, IntegrityError, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -11,6 +11,36 @@ from accounts.roles import admin_required, has_role, ADMIN
 
 from .forms import ComponentForm
 from .models import Component
+
+
+def _save_component_form(request, form, success_message):
+    """Save a valid component atomically and report failures without DB details."""
+    if not form.is_valid():
+        messages.error(
+            request,
+            "The component could not be saved. Please correct the highlighted fields.",
+        )
+        return False
+
+    try:
+        with transaction.atomic():
+            form.save()
+    except IntegrityError:
+        form.add_error(
+            None,
+            "These component details conflict with an existing inventory record.",
+        )
+        messages.error(request, "The component could not be saved. No changes were made.")
+        return False
+    except DatabaseError:
+        messages.error(
+            request,
+            "The component could not be saved. No changes were made. Please try again.",
+        )
+        return False
+
+    messages.success(request, success_message)
+    return True
 
 
 def component_list(request):
@@ -67,14 +97,10 @@ def is_inventory_administrator(user):
 def component_add(request):
     """Add a new electronic component (FR-03, FR-12)."""
     form = ComponentForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        try:
-            form.save()
-        except IntegrityError:
-            form.add_error("component_id", "A component with this ID already exists.")
-        else:
-            messages.success(request, "Component added successfully.")
-            return redirect("inventory:list")
+    if request.method == "POST" and _save_component_form(
+        request, form, "Component added successfully."
+    ):
+        return redirect("inventory:list")
     return render(request, "inventory/component_form.html", {
         "form": form,
         "page_title": "Add Component",
@@ -87,14 +113,10 @@ def component_edit(request, pk):
     """Update component details and stock (FR-06)."""
     component = get_object_or_404(Component, pk=pk)
     form = ComponentForm(request.POST or None, instance=component)
-    if request.method == "POST" and form.is_valid():
-        try:
-            form.save()
-        except IntegrityError:
-            form.add_error("component_id", "A component with this ID already exists.")
-        else:
-            messages.success(request, "Component updated successfully.")
-            return redirect("inventory:list")
+    if request.method == "POST" and _save_component_form(
+        request, form, "Component updated successfully."
+    ):
+        return redirect("inventory:list")
     return render(request, "inventory/component_form.html", {
         "form": form,
         "component": component,
@@ -108,8 +130,16 @@ def component_delete(request, pk):
     """Delete or deactivate component with confirmation (FR-07)."""
     component = get_object_or_404(Component, pk=pk)
     if request.method == "POST":
-        component.is_active = False
-        component.save(update_fields=["is_active", "updated_at"])
+        try:
+            with transaction.atomic():
+                component.is_active = False
+                component.save(update_fields=["is_active", "updated_at"])
+        except DatabaseError:
+            messages.error(
+                request,
+                "The component could not be deactivated. No changes were made. Please try again.",
+            )
+            return redirect("inventory:list")
         messages.success(request, "Component deactivated successfully.")
         return redirect("inventory:list")
     return render(request, "inventory/component_confirm_delete.html", {
