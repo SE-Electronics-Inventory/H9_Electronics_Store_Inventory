@@ -460,3 +460,88 @@ class ComponentAddAuthorizationTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 403)
+
+
+class ComponentDeleteAndDeactivateTests(TestCase):
+    """
+    Test suite for FR-07: Delete or Deactivate Components (ESIM-F-007 / TC-INV-04).
+    Covers User Story #53: Delete or deactivate with confirmation.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.admin_group, _ = Group.objects.get_or_create(
+            name="Inventory Administrator"
+        )
+        self.admin = get_user_model().objects.create_user(
+            username="admin-user",
+            password="admin-password-123",
+        )
+        self.admin.groups.add(self.admin_group)
+
+        self.staff_user = get_user_model().objects.create_user(
+            username="staff-user",
+            password="staff-password-123",
+        )
+
+        self.component = Component.objects.create(
+            component_id="DISCONTINUED-01",
+            name="Discontinued IC Module",
+            category="Semiconductors",
+            price=Decimal("45.00"),
+            quantity=12,
+            minimum_stock=5,
+            is_active=True,
+        )
+        self.delete_url = reverse("inventory:delete", args=[self.component.pk])
+
+    def test_confirmation_page_displays_component_details(self):
+        """TC-INV-04: Confirmation prompt displays before deactivation."""
+        self.client.force_login(self.admin)
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "inventory/component_confirm_delete.html")
+        self.assertContains(response, "DISCONTINUED-01")
+        self.assertContains(response, "Discontinued IC Module")
+        self.assertContains(response, "Confirm Deactivation")
+
+    def test_confirmed_deactivation_removes_from_active_inventory(self):
+        """TC-INV-04: Confirmed action marks component inactive and removes it from active list."""
+        self.client.force_login(self.admin)
+        post_response = self.client.post(self.delete_url)
+        self.assertRedirects(post_response, reverse("inventory:list"))
+
+        # Verify database record is updated to is_active = False
+        self.component.refresh_from_db()
+        self.assertFalse(self.component.is_active)
+
+        # Verify it no longer appears on the active inventory list page
+        list_response = self.client.get(reverse("inventory:list"))
+        self.assertNotContains(list_response, "DISCONTINUED-01")
+
+    def test_cancel_deactivation_leaves_record_unchanged(self):
+        """Cancelling deactivation changes nothing; component remains active."""
+        self.client.force_login(self.admin)
+        # User visits confirmation page then returns to list without submitting POST
+        response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, 200)
+
+        self.component.refresh_from_db()
+        self.assertTrue(self.component.is_active)
+
+    def test_non_admin_cannot_deactivate_component(self):
+        """TC-SEC-01 / TC-SEC-02: Non-admin users are forbidden from deleting/deactivating."""
+        self.client.force_login(self.staff_user)
+        response = self.client.post(self.delete_url)
+        self.assertEqual(response.status_code, 403)
+
+        self.component.refresh_from_db()
+        self.assertTrue(self.component.is_active)
+
+    def test_unauthenticated_user_redirected_to_login(self):
+        """Unauthenticated requests cannot access delete endpoint."""
+        response = self.client.get(self.delete_url)
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={self.delete_url}",
+        )
