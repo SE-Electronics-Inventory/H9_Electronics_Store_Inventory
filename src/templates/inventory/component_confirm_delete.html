@@ -3,13 +3,43 @@
 {% block title %}Deactivate Component - ESIMS{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h1>Deactivate Component</h1>
-    <p>Deactivate <strong>{{ component.component_id }}</strong> - {{ component.name }}?</p>
-    <form method="post" style="margin-top: 1rem;">
+<div class="card" style="max-width: 580px; margin: 2rem auto;">
+    <h2 style="color: var(--danger); margin-bottom: 0.75rem;">Confirm Deactivation</h2>
+    <p style="font-size: 1rem; color: var(--text-main); margin-bottom: 1rem;">
+        Are you sure you want to deactivate this component from the active inventory?
+    </p>
+
+    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;">
+        <div style="margin-bottom: 0.5rem;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Component ID:</span>
+            <strong style="font-family: monospace; font-size: 1rem; color: var(--primary);">{{ component.component_id }}</strong>
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Name:</span>
+            <strong>{{ component.name }}</strong>
+        </div>
+        <div style="margin-bottom: 0.5rem;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Category:</span>
+            <span>{{ component.get_category_display }}</span>
+        </div>
+        <div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Current Quantity:</span>
+            <span>{{ component.quantity }} units</span>
+        </div>
+    </div>
+
+    <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        <em>Note: Deactivating hides the item from the active inventory list while retaining its historical records.</em>
+    </p>
+
+    <form method="post" style="display: flex; gap: 1rem; align-items: center;">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Deactivate</button>
-        <a href="{% url 'inventory:list' %}" class="btn">Cancel</a>
+        <button type="submit" class="btn btn-danger" style="padding: 0.6rem 1.25rem;">
+            Yes, Deactivate Component
+        </button>
+        <a href="{% url 'inventory:list' %}" class="btn" style="background: #e2e8f0; color: #334155; padding: 0.6rem 1.25rem;">
+            Cancel
+        </a>
     </form>
 </div>
 {% endblock %}
