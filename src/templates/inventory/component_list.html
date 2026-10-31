@@ -163,12 +163,8 @@
         </p>
     </div>
     <div style="display: flex; gap: 0.5rem;">
-        {% if user.is_authenticated %}
-            {% for group in user.groups.all %}
-                {% if group.name == 'Inventory Administrator' %}
-                    <a href="{% url 'inventory:add' %}" class="btn btn-primary">+ Add New Component</a>
-                {% endif %}
-            {% endfor %}
+        {% if user.is_authenticated and user.is_staff or user.role == 'ADMIN' %}
+            <a href="{% url 'inventory:add' %}" class="btn btn-primary">+ Add New Component</a>
         {% endif %}
     </div>
 </div>
@@ -177,11 +173,11 @@
 <div class="search-filter-card">
     <form method="get" action="{% url 'inventory:list' %}" class="search-filter-form">
         <div class="search-input-wrapper">
-            <input type="text"
-                   name="q"
+            <input type="text" 
+                   name="q" 
                    id="search-input"
-                   value="{{ search_query }}"
-                   placeholder="Search by ID or name..."
+                   value="{{ search_query }}" 
+                   placeholder="Search by ID or name..." 
                    class="form-control"
                    aria-label="Search by ID or name">
         </div>
@@ -248,6 +244,7 @@
                 <th style="text-align: center;">In Stock</th>
                 <th style="text-align: center;">Min Level</th>
                 <th style="text-align: center;">Availability</th>
+                <th style="text-align: center;">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -285,10 +282,22 @@
                         <span class="badge-status badge-out-of-stock">✖ Out of Stock</span>
                     {% endif %}
                 </td>
+                <td style="text-align: center; white-space: nowrap;">
+                    {% if user.is_authenticated and user.is_staff or user.role == 'ADMIN' %}
+                        <a href="{% url 'inventory:edit' comp.pk %}" class="btn btn-sm" style="background: #f1f5f9; color: var(--primary); border: 1px solid var(--border-color); margin-right: 0.25rem;">
+                            Edit
+                        </a>
+                        <a href="{% url 'inventory:delete' comp.pk %}" class="btn btn-sm btn-danger">
+                            Deactivate
+                        </a>
+                    {% else %}
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">&mdash;</span>
+                    {% endif %}
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7">
+                <td colspan="8">
                     <div class="empty-state">
                         <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">No components found</h3>
                         {% if is_filtered %}
