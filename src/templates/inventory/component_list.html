@@ -283,7 +283,7 @@
                     {% endif %}
                 </td>
                 <td style="text-align: center; white-space: nowrap;">
-                    {% if user.is_authenticated and user.is_staff or user.role == 'ADMIN' %}
+                    {% if can_manage_inventory %}
                         <a href="{% url 'inventory:edit' comp.pk %}" class="btn btn-sm" style="background: #f1f5f9; color: var(--primary); border: 1px solid var(--border-color); margin-right: 0.25rem;">
                             Edit
                         </a>

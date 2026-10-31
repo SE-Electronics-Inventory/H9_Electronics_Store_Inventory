@@ -53,6 +53,7 @@ def component_list(request):
         "selected_category": selected_category,
         "categories": Component.CATEGORY_CHOICES,
         "is_filtered": bool(query or selected_category),
+        "can_manage_inventory": is_inventory_administrator(request.user),
     }
     return render(request, "inventory/component_list.html", context)
 
@@ -82,6 +83,7 @@ def component_add(request):
     })
 
 
+@login_required
 @admin_required  # FR-14
 def component_edit(request, pk):
     """Update component details and stock (FR-06)."""

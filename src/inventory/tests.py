@@ -462,6 +462,108 @@ class ComponentAddAuthorizationTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
+class ComponentEditViewTests(TestCase):
+    def setUp(self):
+        self.admin_group, _ = Group.objects.get_or_create(
+            name="Inventory Administrator"
+        )
+        self.admin = get_user_model().objects.create_user(
+            username="component-editor",
+            password="test-password-123",
+        )
+        self.admin.groups.add(self.admin_group)
+        self.staff = get_user_model().objects.create_user(
+            username="component-viewer",
+            password="test-password-123",
+        )
+        self.component = Component.objects.create(
+            component_id="EDIT-001",
+            name="Original Component",
+            category="Sensors",
+            description="Original description",
+            price=Decimal("5.00"),
+            quantity=4,
+            minimum_stock=2,
+        )
+        self.url = reverse("inventory:edit", args=[self.component.pk])
+
+    def valid_data(self, **overrides):
+        data = {
+            "component_id": self.component.component_id,
+            "name": "Updated Component",
+            "category": "Microcontrollers",
+            "description": "Updated description",
+            "price": "18.75",
+            "quantity": "20",
+            "minimum_stock": "6",
+            "is_active": "on",
+        }
+        data.update(overrides)
+        return data
+
+    def test_admin_can_update_component_details_and_quantity(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.post(self.url, self.valid_data())
+
+        self.assertRedirects(response, reverse("inventory:list"))
+        self.component.refresh_from_db()
+        self.assertEqual(self.component.name, "Updated Component")
+        self.assertEqual(self.component.category, "Microcontrollers")
+        self.assertEqual(self.component.description, "Updated description")
+        self.assertEqual(self.component.price, Decimal("18.75"))
+        self.assertEqual(self.component.quantity, 20)
+        self.assertEqual(self.component.minimum_stock, 6)
+
+    def test_duplicate_component_id_is_rejected_without_changing_record(self):
+        Component.objects.create(
+            component_id="EDIT-002",
+            name="Another Component",
+            price=Decimal("2.00"),
+        )
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            self.url,
+            self.valid_data(component_id="EDIT-002", quantity="99"),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("component_id", response.context["form"].errors)
+        self.component.refresh_from_db()
+        self.assertEqual(self.component.component_id, "EDIT-001")
+        self.assertEqual(self.component.quantity, 4)
+
+    def test_edit_page_is_forbidden_for_non_admin(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_edit_page_requires_login(self):
+        response = self.client.get(self.url)
+
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={self.url}",
+        )
+
+    def test_inventory_administrator_sees_edit_action(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse("inventory:list"))
+
+        self.assertContains(response, reverse("inventory:edit", args=[self.component.pk]))
+
+    def test_staff_does_not_see_edit_action(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(reverse("inventory:list"))
+
+        self.assertNotContains(response, reverse("inventory:edit", args=[self.component.pk]))
+
+
 class ComponentDeleteAndDeactivateTests(TestCase):
     """
     Test suite for FR-07: Delete or Deactivate Components (ESIM-F-007 / TC-INV-04).
