@@ -209,7 +209,9 @@
             <ul class="navbar-nav">
                 <li><a href="{% url 'inventory:list' %}" class="nav-link">Inventory</a></li>
                 <li><a href="{% url 'inventory:low_stock' %}" class="nav-link">Low Stock</a></li>
-                <li><a href="{% url 'reports:dashboard' %}" class="nav-link">Dashboard</a></li>
+                {% if user_role == 'Inventory Administrator' or user_role == 'Store Manager' %}
+                    <li><a href="{% url 'reports:dashboard' %}" class="nav-link">Dashboard</a></li>
+                {% endif %}
                 <li><a href="{% url 'reports:report_list' %}" class="nav-link">Reports</a></li>
                 {% if is_inventory_admin %}
                     <li><a href="{% url 'inventory:add' %}" class="nav-link">+ Add Component</a></li>
