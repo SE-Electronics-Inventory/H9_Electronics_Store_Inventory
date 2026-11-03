@@ -1,5 +1,5 @@
 """
-Inventory Views (FR-03 to FR-09, FR-12, FR-13)
+Inventory Views (FR-03 to FR-09, FR-12, FR-13, FR-16)
 """
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -8,6 +8,7 @@ from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.roles import admin_required, has_role, ADMIN
+from audit.models import log_change
 
 from .forms import ComponentForm
 from .models import Component
@@ -66,11 +67,18 @@ def is_inventory_administrator(user):
 @login_required
 @admin_required  # FR-14: Staff and Manager get the Access-denied page
 def component_add(request):
-    """Add a new electronic component (FR-03, FR-12)."""
+    """Add a new electronic component (FR-03, FR-12, FR-16)."""
     form = ComponentForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
-            form.save()
+            component = form.save()
+            # FR-16: Record inventory addition in audit log
+            log_change(
+                component,
+                action="ADD",
+                user=request.user,
+                details=f"Added component {component.component_id} ({component.name}) with initial stock of {component.quantity} units"
+            )
         except IntegrityError:
             form.add_error("component_id", "A component with this ID already exists.")
         else:
@@ -86,12 +94,19 @@ def component_add(request):
 @login_required
 @admin_required  # FR-14
 def component_edit(request, pk):
-    """Update component details and stock (FR-06)."""
+    """Update component details and stock (FR-06, FR-16)."""
     component = get_object_or_404(Component, pk=pk)
     form = ComponentForm(request.POST or None, instance=component)
     if request.method == "POST" and form.is_valid():
         try:
-            form.save()
+            component = form.save()
+            # FR-16: Record inventory update in audit log
+            log_change(
+                component,
+                action="EDIT",
+                user=request.user,
+                details=f"Updated component {component.component_id} (stock: {component.quantity}, price: ₹{component.price})"
+            )
         except IntegrityError:
             form.add_error("component_id", "A component with this ID already exists.")
         else:
@@ -107,11 +122,18 @@ def component_edit(request, pk):
 
 @admin_required  # FR-14
 def component_delete(request, pk):
-    """Delete or deactivate component with confirmation (FR-07)."""
+    """Delete or deactivate component with confirmation (FR-07, FR-16)."""
     component = get_object_or_404(Component, pk=pk)
     if request.method == "POST":
         component.is_active = False
         component.save(update_fields=["is_active", "updated_at"])
+        # FR-16: Record inventory deactivation in audit log
+        log_change(
+            component,
+            action="DELETE",
+            user=request.user,
+            details=f"Deactivated component {component.component_id} ({component.name}) from active inventory"
+        )
         messages.success(request, "Component deactivated successfully.")
         return redirect("inventory:list")
     return render(request, "inventory/component_confirm_delete.html", {
