@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Low-Stock Components - ESIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .low-stock-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.25rem;
+    }
+    .low-stock-table-wrap {
+        overflow-x: auto;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .low-stock-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .low-stock-table th,
+    .low-stock-table td {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .low-stock-table th {
+        background: #f1f5f9;
+        color: #334155;
+        white-space: nowrap;
+    }
+    .low-stock-table tbody tr:last-child td { border-bottom: 0; }
+    .low-stock-table tbody tr:hover { background: #f8fafc; }
+    .component-code {
+        color: var(--primary);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-weight: 600;
+    }
+    .stock-warning {
+        color: var(--danger);
+        font-weight: 700;
+    }
+    .stock-low {
+        color: #b45309;
+        font-weight: 700;
+    }
+    .empty-state {
+        padding: 2.5rem 1.25rem;
+        color: var(--text-muted);
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="low-stock-header">
+    <div>
+        <h1>Low-Stock Components</h1>
+        <p style="color: var(--text-muted); margin-top: 0.3rem;">
+            Components at or below their minimum stock level.
+        </p>
+    </div>
+    <a href="{% url 'inventory:list' %}" class="btn btn-primary">View Full Inventory</a>
+</div>
+
+<div class="low-stock-table-wrap">
+    <table class="low-stock-table">
+        <thead>
+            <tr>
+                <th>Component ID</th>
+                <th>Component Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Minimum Stock</th>
+                <th>Availability</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for component in components %}
+                <tr>
+                    <td><span class="component-code">{{ component.component_id }}</span></td>
+                    <td>{{ component.name }}</td>
+                    <td>{{ component.get_category_display }}</td>
+                    <td class="{% if component.quantity == 0 %}stock-warning{% else %}stock-low{% endif %}">
+                        {{ component.quantity }}
+                    </td>
+                    <td>{{ component.minimum_stock }}</td>
+                    <td>{{ component.availability }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <h2>No low-stock components</h2>
+                            <p style="margin-top: 0.4rem;">All active components are above their minimum stock levels.</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
