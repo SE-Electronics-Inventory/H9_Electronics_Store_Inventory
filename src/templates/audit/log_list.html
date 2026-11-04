@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Trail & Change History - ESIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .audit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .filter-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .filter-form {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .filter-input-wrapper {
+        flex: 2;
+        min-width: 220px;
+    }
+    .filter-select-wrapper {
+        flex: 1;
+        min-width: 180px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: var(--text-main);
+        background-color: #ffffff;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .table-container {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow-x: auto;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    table.audit-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.95rem;
+    }
+    table.audit-table th {
+        background-color: #f1f5f9;
+        color: #334155;
+        font-weight: 600;
+        padding: 0.85rem 1rem;
+        border-bottom: 2px solid var(--border-color);
+        white-space: nowrap;
+    }
+    table.audit-table td {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    table.audit-table tr:hover {
+        background-color: #f8fafc;
+    }
+    .badge-action {
+        display: inline-block;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 9999px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .badge-action-add {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+    .badge-action-edit {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+    .badge-action-delete {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+    .component-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-weight: 600;
+        color: var(--primary);
+    }
+    .timestamp-text {
+        font-family: ui-monospace, monospace;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="audit-header">
+    <div>
+        <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-main);">
+            📜 Inventory Change Tracking (Audit Trail)
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+            Chronological audit history of component additions, updates, and deactivations (ESIM-F-016 / Story #58 / TC-AUD-01)
+        </p>
+    </div>
+    <div style="font-size: 0.9rem; color: var(--text-muted);">
+        Total Logged Changes: <strong>{{ total_logs }}</strong>
+    </div>
+</div>
+
+<!-- Search & Filter Bar (Story #58) -->
+<div class="filter-card">
+    <form method="get" action="{% url 'audit:log_list' %}" class="filter-form">
+        <div class="filter-input-wrapper">
+            <input type="text"
+                   name="q"
+                   id="search-input"
+                   value="{{ search_query }}"
+                   placeholder="Search by component ID or name..."
+                   class="form-control"
+                   aria-label="Search logs">
+        </div>
+
+        <div class="filter-select-wrapper">
+            <select name="action" id="action-select" class="form-control" aria-label="Filter by action">
+                <option value="">All Actions</option>
+                {% for code, label in action_choices %}
+                    <option value="{{ code }}" {% if selected_action == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.25rem;">
+                Filter Logs
+            </button>
+            {% if is_filtered %}
+                <a href="{% url 'audit:log_list' %}" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid var(--border-color); padding: 0.6rem 1rem;">
+                    ✕ Reset
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Change Log Table (Story #58: Newest first) -->
+<div class="table-container">
+    <table class="audit-table">
+        <thead>
+            <tr>
+                <th style="width: 180px;">Time of Change</th>
+                <th>Component ID</th>
+                <th>Component Name</th>
+                <th style="text-align: center;">Action</th>
+                <th>Performed By</th>
+                <th>Details / Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in logs %}
+            <tr>
+                <td>
+                    <span class="timestamp-text">{{ entry.timestamp|date:"Y-m-d H:i:s" }}</span>
+                </td>
+                <td>
+                    <span class="component-code">{{ entry.component_id }}</span>
+                </td>
+                <td>
+                    <strong>{{ entry.component_name }}</strong>
+                </td>
+                <td style="text-align: center;">
+                    {% if entry.action == "ADD" %}
+                        <span class="badge-action badge-action-add">＋ Added</span>
+                    {% elif entry.action == "EDIT" %}
+                        <span class="badge-action badge-action-edit">✎ Updated</span>
+                    {% elif entry.action == "DELETE" %}
+                        <span class="badge-action badge-action-delete">✖ Deactivated</span>
+                    {% else %}
+                        <span class="badge-action">{{ entry.get_action_display }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if entry.user %}
+                        <strong>{{ entry.user.username }}</strong>
+                    {% else %}
+                        <span style="color: var(--text-muted);">System</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-muted); font-size: 0.9rem;">
+                    {{ entry.details|default:"—" }}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">No change records found</h3>
+                        {% if is_filtered %}
+                            <p style="margin-bottom: 1rem;">No audit logs match the current search or action filter.</p>
+                            <a href="{% url 'audit:log_list' %}" class="btn btn-sm btn-primary">Clear Filters</a>
+                        {% else %}
+                            <p>No inventory modifications have been logged yet.</p>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
