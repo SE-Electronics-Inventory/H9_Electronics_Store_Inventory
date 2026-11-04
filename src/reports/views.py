@@ -2,10 +2,12 @@
 Reports & Dashboard Views (FR-10, FR-11: Generate Inventory Reports)
 """
 import csv
-from django.db.models import F
+from django.contrib.auth.decorators import login_required
+from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from accounts.roles import ADMIN, MANAGER, role_required
 from inventory.models import Component
 
 
