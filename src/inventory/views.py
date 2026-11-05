@@ -3,7 +3,7 @@ Inventory Views (FR-03 to FR-09, FR-12, FR-13, FR-16, NFR-03)
 """
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError, transaction
+from django.db import DatabaseError, IntegrityError, transaction
 from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -13,6 +13,38 @@ from audit.models import log_change
 from .forms import ComponentForm
 from .models import Component
 
+
+def _save_component_form(request, form, success_message, action, details):
+    """Save a valid component and audit record atomically; hide database details."""
+    if not form.is_valid():
+        messages.error(
+            request,
+            "The component could not be saved. Please correct the highlighted fields.",
+        )
+        return None
+
+    try:
+        with transaction.atomic():
+            component = form.save()
+            log_change(
+                component,
+                action=action,
+                user=request.user,
+                details=details(component),
+            )
+    except IntegrityError:
+        form.add_error("component_id", "A component with this ID already exists.")
+        messages.error(request, "The component could not be saved. No changes were made.")
+        return None
+    except DatabaseError:
+        messages.error(
+            request,
+            "The component could not be saved. No changes were made. Please try again.",
+        )
+        return None
+
+    messages.success(request, success_message)
+    return component
 
 def component_list(request):
     """
@@ -73,30 +105,24 @@ def component_add(request):
     and audit logging complete as one atomic unit or rollback entirely (TC-REL-01).
     """
     form = ComponentForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        try:
-            with transaction.atomic():
-                component = form.save()
-                # FR-16: Record inventory addition in audit log
-                log_change(
-                    component,
-                    action="ADD",
-                    user=request.user,
-                    details=f"Added component {component.component_id} ({component.name}) with initial stock of {component.quantity} units"
-                )
-        except IntegrityError:
-            form.add_error("component_id", "A component with this ID already exists.")
-        except Exception:
-            messages.error(request, "A database error occurred while saving the component. Transaction was rolled back.")
-        else:
-            messages.success(request, "Component added successfully.")
+    if request.method == "POST":
+        component = _save_component_form(
+            request,
+            form,
+            "Component added successfully.",
+            action="ADD",
+            details=lambda saved: (
+                f"Added component {saved.component_id} ({saved.name}) "
+                f"with initial stock of {saved.quantity} units"
+            ),
+        )
+        if component:
             return redirect("inventory:list")
     return render(request, "inventory/component_form.html", {
         "form": form,
         "page_title": "Add Component",
         "submit_label": "Add Component",
     })
-
 
 @login_required
 @admin_required  # FR-14
@@ -108,23 +134,18 @@ def component_edit(request, pk):
     """
     component = get_object_or_404(Component, pk=pk)
     form = ComponentForm(request.POST or None, instance=component)
-    if request.method == "POST" and form.is_valid():
-        try:
-            with transaction.atomic():
-                component = form.save()
-                # FR-16: Record inventory update in audit log
-                log_change(
-                    component,
-                    action="EDIT",
-                    user=request.user,
-                    details=f"Updated component {component.component_id} (stock: {component.quantity}, price: ₹{component.price})"
-                )
-        except IntegrityError:
-            form.add_error("component_id", "A component with this ID already exists.")
-        except Exception:
-            messages.error(request, "A database error occurred while updating the component. Transaction was rolled back.")
-        else:
-            messages.success(request, "Component updated successfully.")
+    if request.method == "POST":
+        saved_component = _save_component_form(
+            request,
+            form,
+            "Component updated successfully.",
+            action="EDIT",
+            details=lambda saved: (
+                f"Updated component {saved.component_id} "
+                f"(stock: {saved.quantity}, price: ₹{saved.price})"
+            ),
+        )
+        if saved_component:
             return redirect("inventory:list")
     return render(request, "inventory/component_form.html", {
         "form": form,
@@ -147,19 +168,23 @@ def component_delete(request, pk):
             with transaction.atomic():
                 component.is_active = False
                 component.save(update_fields=["is_active", "updated_at"])
-                # FR-16: Record inventory deactivation in audit log
                 log_change(
                     component,
                     action="DELETE",
                     user=request.user,
-                    details=f"Deactivated component {component.component_id} ({component.name}) from active inventory"
+                    details=(
+                        f"Deactivated component {component.component_id} "
+                        f"({component.name}) from active inventory"
+                    ),
                 )
-        except Exception:
-            messages.error(request, "A database error occurred while deactivating the component. Transaction was rolled back.")
+        except DatabaseError:
+            messages.error(
+                request,
+                "The component could not be deactivated. No changes were made. Please try again.",
+            )
             return redirect("inventory:list")
-        else:
-            messages.success(request, "Component deactivated successfully.")
-            return redirect("inventory:list")
+        messages.success(request, "Component deactivated successfully.")
+        return redirect("inventory:list")
     return render(request, "inventory/component_confirm_delete.html", {
         "component": component,
     })

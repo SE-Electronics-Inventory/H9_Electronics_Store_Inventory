@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory Dashboard - ESIMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.25rem 0 1.75rem; }
+    .dashboard-card { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; }
+    .dashboard-card h2 { color: var(--text-muted); font-size: .9rem; font-weight: 600; }
+    .dashboard-value { display: block; margin-top: .35rem; font-size: 2rem; font-weight: 700; color: var(--primary); }
+    .low-stock-table { width: 100%; border-collapse: collapse; background: #fff; }
+    .low-stock-table th, .low-stock-table td { padding: .75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+    .low-stock-table th { background: #f1f5f9; }
+    .stock-alert { color: #92400e; font-weight: 700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Inventory Dashboard</h1>
+<p>Current totals for active inventory records.</p>
+
+<section class="dashboard-grid" aria-label="Inventory summary">
+    <article class="dashboard-card" aria-labelledby="total-components-label">
+        <h2 id="total-components-label">Total components</h2>
+        <span class="dashboard-value">{{ total_components }}</span>
+    </article>
+    <article class="dashboard-card" aria-labelledby="available-stock-label">
+        <h2 id="available-stock-label">Available stock units</h2>
+        <span class="dashboard-value">{{ available_stock }}</span>
+    </article>
+    <article class="dashboard-card" aria-labelledby="low-stock-label">
+        <h2 id="low-stock-label">Low-stock components</h2>
+        <span class="dashboard-value">{{ low_stock_count }}</span>
+    </article>
+</section>
+
+<section aria-labelledby="low-stock-heading">
+    <h2 id="low-stock-heading">Components at or below minimum stock</h2>
+    {% if low_stock_components %}
+    <div style="overflow-x: auto; margin-top: .75rem;">
+        <table class="low-stock-table">
+            <thead><tr><th scope="col">Component ID</th><th scope="col">Name</th><th scope="col">Quantity</th><th scope="col">Minimum</th><th scope="col">Status</th></tr></thead>
+            <tbody>
+                {% for component in low_stock_components %}
+                <tr>
+                    <td>{{ component.component_id }}</td><td>{{ component.name }}</td>
+                    <td>{{ component.quantity }}</td><td>{{ component.minimum_stock }}</td>
+                    <td class="stock-alert">Low stock</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No active components are at or below their minimum stock level.</p>
+    {% endif %}
+</section>
+{% endblock %}
