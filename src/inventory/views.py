@@ -1,5 +1,5 @@
 """
-Inventory Views (FR-03 to FR-09, FR-12, FR-13, FR-16)
+Inventory Views (FR-03 to FR-09, FR-12, FR-13, FR-16, NFR-03)
 """
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -99,7 +99,11 @@ def is_inventory_administrator(user):
 @login_required
 @admin_required  # FR-14: Staff and Manager get the Access-denied page
 def component_add(request):
-    """Add a new electronic component (FR-03, FR-12, FR-16)."""
+    """
+    Add a new electronic component (FR-03, FR-12, FR-16, NFR-03).
+    Runs inside a database transaction (transaction.atomic) so that component creation
+    and audit logging complete as one atomic unit or rollback entirely (TC-REL-01).
+    """
     form = ComponentForm(request.POST or None)
     if request.method == "POST":
         component = _save_component_form(
@@ -123,7 +127,11 @@ def component_add(request):
 @login_required
 @admin_required  # FR-14
 def component_edit(request, pk):
-    """Update component details and stock (FR-06, FR-16)."""
+    """
+    Update component details and stock (FR-06, FR-16, NFR-03).
+    Runs inside a database transaction (transaction.atomic) ensuring all updates
+    and audit logging commit atomically or leave the record unchanged (TC-REL-01).
+    """
     component = get_object_or_404(Component, pk=pk)
     form = ComponentForm(request.POST or None, instance=component)
     if request.method == "POST":
@@ -149,7 +157,11 @@ def component_edit(request, pk):
 
 @admin_required  # FR-14
 def component_delete(request, pk):
-    """Delete or deactivate component with confirmation (FR-07, FR-16)."""
+    """
+    Delete or deactivate component with confirmation (FR-07, FR-16, NFR-03).
+    Runs inside a database transaction (transaction.atomic) so that deactivation and
+    change log recording succeed or fail atomically without corrupting data (TC-REL-01).
+    """
     component = get_object_or_404(Component, pk=pk)
     if request.method == "POST":
         try:
