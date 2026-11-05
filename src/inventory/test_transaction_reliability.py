@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.db import IntegrityError
+from django.db import DatabaseError, IntegrityError
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -73,7 +73,7 @@ class TransactionReliabilityTests(TestCase):
         }
 
         # Force a failure during the audit log write inside the atomic block
-        with patch("inventory.views.log_change", side_effect=RuntimeError("Simulated DB connection failure")):
+        with patch("inventory.views.log_change", side_effect=DatabaseError("Simulated DB connection failure")):
             response = self.client.post(reverse("inventory:add"), data)
 
         # Database must roll back: component is NOT saved
@@ -139,7 +139,7 @@ class TransactionReliabilityTests(TestCase):
         }
 
         # Force a failure inside the atomic block after model write
-        with patch("inventory.views.log_change", side_effect=RuntimeError("Simulated network glitch during logging")):
+        with patch("inventory.views.log_change", side_effect=DatabaseError("Simulated network glitch during logging")):
             response = self.client.post(reverse("inventory:edit", args=[comp.pk]), data)
 
         # The record MUST be in its previous valid state (TC-REL-01)
@@ -190,7 +190,7 @@ class TransactionReliabilityTests(TestCase):
         )
 
         # Force a failure during the atomic delete transaction
-        with patch("inventory.views.log_change", side_effect=RuntimeError("Simulated failure during deletion")):
+        with patch("inventory.views.log_change", side_effect=DatabaseError("Simulated failure during deletion")):
             response = self.client.post(reverse("inventory:delete", args=[comp.pk]))
 
         # The record MUST remain in its previous valid state (is_active=True)
