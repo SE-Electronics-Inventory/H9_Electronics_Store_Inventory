@@ -16,6 +16,8 @@ __pycache__/
 *.sqlite3-journal
 db.sqlite3
 media/
+backups/
+*.sqlite3.backup
 
 # Environment variables
 .env
