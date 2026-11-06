@@ -163,7 +163,7 @@
         </p>
     </div>
     <div style="display: flex; gap: 0.5rem;">
-        {% if user.is_authenticated and user.is_staff or user.role == 'ADMIN' %}
+        {% if can_manage_inventory %}
             <a href="{% url 'inventory:add' %}" class="btn btn-primary">+ Add New Component</a>
         {% endif %}
     </div>
@@ -171,9 +171,10 @@
 
 <!-- Search & Filter Bar (FR-05: #51, #52 / TC-SEARCH-01) -->
 <div class="search-filter-card">
-    <form method="get" action="{% url 'inventory:list' %}" class="search-filter-form">
+    <form method="get" action="{% url 'inventory:list' %}" class="search-filter-form" role="search" aria-label="Search inventory">
         <div class="search-input-wrapper">
-            <input type="text" 
+            <label for="search-input" class="visually-hidden">Search components by ID or name</label>
+            <input type="search"
                    name="q" 
                    id="search-input"
                    value="{{ search_query }}" 
@@ -199,7 +200,7 @@
         {% endif %}
     </form>
     {% if is_filtered %}
-        <div style="margin-top: 0.75rem; font-size: 0.875rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
+        <div role="status" aria-live="polite" style="margin-top: 0.75rem; font-size: 0.875rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
             <span>Filtered results for:</span>
             {% if search_query %}
                 <span class="badge-category">Query: <strong>"{{ search_query }}"</strong></span>

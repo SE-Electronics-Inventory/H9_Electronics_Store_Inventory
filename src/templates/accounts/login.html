@@ -11,7 +11,7 @@
         </p>
 
         {% if form.errors %}
-            <div class="alert alert-error">
+            <div class="alert alert-error" role="alert" id="login-error">
                 Invalid username or password. Please try again.
             </div>
         {% endif %}
@@ -20,13 +20,13 @@
             {% csrf_token %}
             <div style="margin-bottom: 1.25rem;">
                 <label for="id_username" style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.9rem;">Username</label>
-                <input type="text" name="username" autofocus required id="id_username" 
+                <input type="text" name="username" autofocus required autocomplete="username" aria-describedby="{% if form.errors %}login-error{% endif %}" id="id_username"
                        style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem;">
             </div>
 
             <div style="margin-bottom: 1.5rem;">
                 <label for="id_password" style="display: block; margin-bottom: 0.35rem; font-weight: 500; font-size: 0.9rem;">Password</label>
-                <input type="password" name="password" required id="id_password"
+                <input type="password" name="password" required autocomplete="current-password" aria-describedby="{% if form.errors %}login-error{% endif %}" id="id_password"
                        style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem;">
             </div>
 
