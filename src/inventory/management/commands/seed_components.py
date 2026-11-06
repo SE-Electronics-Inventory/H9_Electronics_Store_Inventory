@@ -1,8 +1,11 @@
 """
 Management command to seed realistic electronic components (FR-04, TC-INV-02, TC-AVAIL-01)
 """
-from django.core.management.base import BaseCommand
+import re
 from decimal import Decimal
+
+from django.core.management.base import BaseCommand, CommandError
+
 from inventory.models import Component
 
 
@@ -110,7 +113,20 @@ SAMPLE_COMPONENTS = [
 
 
 class Command(BaseCommand):
-    help = "Populate database with realistic initial electronic components"
+    help = "Seed realistic samples and optionally add a scalability dataset."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--count",
+            type=int,
+            default=0,
+            help="Also ensure this many generated SCALE records exist (default: 0).",
+        )
+        parser.add_argument(
+            "--prefix",
+            default="SCALE",
+            help="ID prefix for generated scalability records (default: SCALE).",
+        )
 
     def handle(self, *args, **options):
         created_count = 0
@@ -121,6 +137,52 @@ class Command(BaseCommand):
             )
             if created:
                 created_count += 1
+
+        count = options["count"]
+        if count < 0:
+            raise CommandError("--count must be zero or a positive integer.")
+        scale_created = 0
+        prefix = options["prefix"].strip()
+        if count:
+            if not re.fullmatch(r"[A-Za-z0-9_-]+", prefix):
+                raise CommandError("--prefix may contain only letters, numbers, hyphens, and underscores.")
+            if len(prefix) + 1 + max(6, len(str(count))) > 50:
+                raise CommandError("--prefix is too long for the generated component IDs.")
+
+            ids = [f"{prefix}-{index:06d}" for index in range(1, count + 1)]
+            existing = set(
+                Component.objects.filter(component_id__in=ids).values_list(
+                    "component_id", flat=True
+                )
+            )
+            categories = [choice[0] for choice in Component.CATEGORY_CHOICES]
+            records = [
+                Component(
+                    component_id=component_id,
+                    name=f"Scalability Component {index:06d}",
+                    category=categories[(index - 1) % len(categories)],
+                    description=f"Generated inventory record {index} for NFR-02.",
+                    price=Decimal("10.00") + Decimal(index % 500) / 100,
+                    quantity=10 + index % 50,
+                    minimum_stock=5,
+                )
+                for index, component_id in enumerate(ids, start=1)
+                if component_id not in existing
+            ]
+            Component.objects.bulk_create(records, batch_size=100)
+            scale_created = len(records)
+
+        if count:
+            message = (
+                f"Seeded {created_count} realistic samples and ensured {count} records "
+                f"with prefix {prefix} ({scale_created} newly created). "
+                f"Total components: {Component.objects.count()}"
+            )
+        else:
+            message = (
+                f"Successfully seeded {created_count} components. "
+                f"Total components: {Component.objects.count()}"
+            )
         self.stdout.write(
-            self.style.SUCCESS(f"Successfully seeded {created_count} components. Total components: {Component.objects.count()}")
+            self.style.SUCCESS(message)
         )
