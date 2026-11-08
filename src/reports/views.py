@@ -52,6 +52,8 @@ def dashboard(request):
     })
 
 
+@login_required
+@role_required(ADMIN, MANAGER)
 def report_list(request):
     """
     Generate and filter inventory reports (FR-11: ESIM-F-011 / TC-REP-01).
@@ -88,6 +90,8 @@ def report_list(request):
     return render(request, "reports/report_list.html", context)
 
 
+@login_required
+@role_required(ADMIN, MANAGER)
 def export_report_csv(request):
     """
     Export inventory report to downloadable CSV file (FR-11 / Story #56).

@@ -515,6 +515,18 @@ class ComponentEditViewTests(TestCase):
         self.assertEqual(self.component.quantity, 20)
         self.assertEqual(self.component.minimum_stock, 6)
 
+    def test_edit_form_cannot_deactivate_component_without_confirmation(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(self.url)
+        self.assertNotContains(response, 'name="is_active"')
+
+        response = self.client.post(self.url, self.valid_data(is_active=""))
+
+        self.assertRedirects(response, reverse("inventory:list"))
+        self.component.refresh_from_db()
+        self.assertTrue(self.component.is_active)
+
     def test_duplicate_component_id_is_rejected_without_changing_record(self):
         Component.objects.create(
             component_id="EDIT-002",

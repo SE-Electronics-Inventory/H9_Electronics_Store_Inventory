@@ -80,7 +80,9 @@ WSGI_APPLICATION = "esims.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        # Allow demo and isolated verification databases without touching the
+        # developer's normal local inventory database.
+        "NAME": os.environ.get("ESIMS_DB_PATH", str(BASE_DIR / "db.sqlite3")),
     }
 }
 

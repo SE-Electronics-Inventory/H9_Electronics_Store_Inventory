@@ -45,7 +45,7 @@
                 <tr>
                     <td>{{ component.component_id }}</td><td>{{ component.name }}</td>
                     <td>{{ component.quantity }}</td><td>{{ component.minimum_stock }}</td>
-                    <td class="stock-alert">Low stock</td>
+                    <td class="stock-alert">{{ component.availability }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

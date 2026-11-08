@@ -38,6 +38,12 @@ class InventoryReportTests(TestCase):
         )
         self.admin.groups.add(self.admin_group)
 
+        self.staff_group, _ = Group.objects.get_or_create(name=STAFF)
+        self.staff = get_user_model().objects.create_user(
+            username="staff_report_test", password="Password@123"
+        )
+        self.staff.groups.add(self.staff_group)
+
         # Create test inventory components (TC-REP-01 dataset)
         # In stock component (qty > min_stock)
         self.c1 = Component.objects.create(
@@ -92,6 +98,20 @@ class InventoryReportTests(TestCase):
             with self.subTest(url=url):
                 response = self.client.get(url)
                 self.assertRedirects(response, f"{reverse('accounts:login')}?next={url}")
+
+    def test_staff_cannot_open_reports_or_csv_export(self):
+        """Staff can view inventory, but reporting is restricted to managers and admins."""
+        self.client.force_login(self.staff)
+        for url in [self.report_url, self.export_url]:
+            with self.subTest(url=url):
+                self.assertEqual(self.client.get(url).status_code, 403)
+
+    def test_reports_navigation_is_hidden_from_staff(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(reverse("inventory:list"))
+
+        self.assertNotContains(response, reverse("reports:report_list"))
 
     def test_store_manager_can_generate_inventory_report(self):
         """
@@ -217,6 +237,7 @@ class InventoryReportTests(TestCase):
         response = self.client.get(self.export_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+
         self.assertIn('attachment; filename="inventory_report.csv"', response["Content-Disposition"])
 
         content = response.content.decode("utf-8")
@@ -274,3 +295,81 @@ class InventoryReportTests(TestCase):
         response = self.client.get(self.report_url, {"format": "csv"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+
+
+class InventoryDashboardTests(TestCase):
+    def setUp(self):
+        self.admin = self._user("dashboard_admin", ADMIN)
+        self.manager = self._user("dashboard_manager", MANAGER)
+        self.staff = self._user("dashboard_staff", STAFF)
+        self.url = reverse("reports:dashboard")
+
+        Component.objects.create(
+            component_id="DASH-IN-STOCK",
+            name="In-stock component",
+            price=Decimal("10.00"),
+            quantity=20,
+            minimum_stock=5,
+        )
+        Component.objects.create(
+            component_id="DASH-LOW",
+            name="Low-stock component",
+            price=Decimal("5.00"),
+            quantity=2,
+            minimum_stock=5,
+        )
+        Component.objects.create(
+            component_id="DASH-OUT",
+            name="Out-of-stock component",
+            price=Decimal("7.00"),
+            quantity=0,
+            minimum_stock=5,
+        )
+        Component.objects.create(
+            component_id="DASH-INACTIVE",
+            name="Inactive component",
+            price=Decimal("100.00"),
+            quantity=100,
+            minimum_stock=5,
+            is_active=False,
+        )
+
+    @staticmethod
+    def _user(username, role):
+        group, _ = Group.objects.get_or_create(name=role)
+        user = get_user_model().objects.create_user(
+            username=username, password="Password@123"
+        )
+        user.groups.add(group)
+        return user
+
+    def test_dashboard_metrics_match_active_inventory_and_stock_boundaries(self):
+        self.client.force_login(self.manager)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_components"], 3)
+        self.assertEqual(response.context["available_stock"], 22)
+        self.assertEqual(response.context["low_stock_count"], 2)
+        self.assertContains(response, "DASH-LOW")
+        self.assertContains(response, "Low Stock")
+        self.assertContains(response, "DASH-OUT")
+        self.assertContains(response, "Out of Stock")
+        self.assertNotContains(response, "DASH-INACTIVE")
+
+    def test_admin_and_manager_can_view_dashboard_but_staff_cannot(self):
+        for user in (self.admin, self.manager):
+            with self.subTest(role=user.username):
+                self.client.force_login(user)
+                self.assertEqual(self.client.get(self.url).status_code, 200)
+
+        self.client.force_login(self.staff)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+    def test_dashboard_navigation_is_hidden_from_staff(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(reverse("inventory:list"))
+
+        self.assertNotContains(response, reverse("reports:dashboard"))

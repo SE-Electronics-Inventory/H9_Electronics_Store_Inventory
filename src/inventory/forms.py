@@ -16,7 +16,6 @@ class ComponentForm(forms.ModelForm):
             "price",
             "quantity",
             "minimum_stock",
-            "is_active",
         ]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 3}),

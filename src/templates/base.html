@@ -224,7 +224,9 @@
                 {% if user_role == 'Inventory Administrator' or user_role == 'Store Manager' %}
                     <li><a href="{% url 'reports:dashboard' %}" class="nav-link">Dashboard</a></li>
                 {% endif %}
-                <li><a href="{% url 'reports:report_list' %}" class="nav-link">Reports</a></li>
+                {% if user_role == 'Inventory Administrator' or user_role == 'Store Manager' %}
+                    <li><a href="{% url 'reports:report_list' %}" class="nav-link">Reports</a></li>
+                {% endif %}
                 {% if is_inventory_admin %}
                     <li><a href="{% url 'inventory:add' %}" class="nav-link">+ Add Component</a></li>
                     <li><a href="{% url 'audit:log_list' %}" class="nav-link">Audit Trail</a></li>
