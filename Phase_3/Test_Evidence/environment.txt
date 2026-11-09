@@ -1,0 +1,5 @@
+Python 3.11.9
+5.2.18
+Coverage.py, version 7.17.2 with C extension
+Full documentation is at https://coverage.readthedocs.io/en/7.17.2
+b1e3590fd85014ed06d8f0443a03fd04f20a5695
