@@ -131,21 +131,13 @@ src/accounts/test_sr06_log_secrets.py.
 
 
 | Area | Submitted SAD | Implemented behaviour | Impact / explanation |
-
 |---|---|---|---|
-
 | Login URL | /login/ | /accounts/login/ | URLs are grouped by Django app; documentation must use the actual route. |
-
 | Logout URL | /logout/ | /accounts/logout/ | Same app-based URL organization. |
-
 | Successful login | Redirect to /dashboard/ | Redirect to /inventory/ | Inventory is the common landing page; dashboard access is role-restricted. |
-
 | Authentication modules | Named AuthModule and SessionManager | Django authentication views, middleware and sessions | Design responsibilities use framework facilities rather than separate custom classes. |
-
 | Authorization module | Named AuthorizationModule | Group checks and decorators in accounts/roles.py | Implements the responsibility using shared helpers. |
-
 | Dashboard access | UX table lists all users, mainly Manager | Inventory Administrator and Store Manager only | Team must reconcile the SAD role table with the implemented access policy. |
-
 | Authentication logging | Describes login and failed-login event logging | Tests inspect emitted logs for secrets | Secret-free log tests do not prove that every authentication event is logged; this needs separate verification. |
 
 
