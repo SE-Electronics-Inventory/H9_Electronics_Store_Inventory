@@ -300,30 +300,34 @@ GitHub issue was closed.
 
 ### Performance and scalability
 
+Evidence:
+- [Performance baseline](../Phase_2/NFR01_Performance_Baseline.md)
+- [Scalability validation](../Phase_2/NFR02_Scalability_Validation.md)
+- [Performance tests](../src/nfr_tools/test_inventory_performance.py)
+- [Scalability tests](../src/inventory/test_scalability.py)
 
+NFR-01 / TC-PERF-01:
+Swara's recorded run without coverage on 9 November 2026 measured
+50 requests across inventory list, search, add, edit and deactivate
+operations. All 50 completed within two seconds; overall p90 was
+8.49 ms. The performance test passed.
 
-The repository contains:
+This measures Django test-client request processing, including views,
+ORM and templates. It excludes browser rendering and network latency.
+It does not establish concurrent-user load performance.
 
-- ../Phase_2/NFR01_Performance_Baseline.md
+NFR-02 / TC-PERF-02:
+The scalability tests exercise listing and searching with 1,000
+component records, followed by adding, editing and deactivating a
+component. Additional tests verify seed-command behaviour and
+idempotence. These tests passed within the recorded 158-test suite.
 
-- ../Phase_2/NFR02_Scalability_Validation.md
+The tested commit and local environment are recorded in Section 2.
+Simret's separately documented baseline has its own date, runtime
+and timings; it must not be combined with Swara's measurement.
 
-
-
-The local run without coverage reported 50 of 50 measured requests
-
-within two seconds, with overall p90 of 8.49 ms.
-
-
-
-This is a Django test-client application-level measurement.
-
-It does not include real-browser rendering or production network load.
-
-Timing under coverage instrumentation is kept separate from the
-
-uninstrumented baseline.
-
+Status: automated application-level performance and 1,000-record
+scalability checks passed within the stated scope.
 
 
 ### Availability
@@ -362,31 +366,49 @@ and record actual outcomes.
 
 ### Browser compatibility
 
+The browser report and automated checks are linked to PR #112:
+https://github.com/SE-Electronics-Inventory/H9_Electronics_Store_Inventory/pull/112
 
+Shriya reports manual Chrome and Edge testing on Windows 11 on
+8 November 2026. Exact installed browser versions and supporting
+browser-specific execution records remain to be confirmed.
 
-The repository contains a report claiming successful browser checks.
+The Sprint 2 recording demonstrates working application workflows.
+It does not independently establish compatibility across all three
+required browsers.
 
-The inspected automated tests simulate User-Agent headers rather
+The automated tests use Django's test client with Chrome, Edge and
+Firefox User-Agent strings. They check selected server responses,
+HTML content and CSV headers; they do not launch browser engines
+or verify visual rendering.
 
-than launching real browser engines.
+Actual Firefox browser testing remains pending.
 
+Status: partially validated. NFR-07 / TC-COMP-01 must not yet be
+recorded as fully passed.
 
-
-Team action: substantiate the report with actual Chrome, Edge and
-
-Firefox versions, execution details and screenshots or browser-test logs.
-
+Follow-up owner: Shriya.
+Complete Firefox testing, record exact browser versions and actual
+results, and revise the compatibility report's overall status and
+matrix to distinguish manual browser results from test-client checks.
 
 
 ### Backup and recovery
-
-
-
 Recovery tooling and automated tests exist.
 
-Team action: attach or reference an actual isolated backup/restore
+PR #106 documents a successful backup and isolated restore verification
+using a disposable migrated Django database. Backup and restored-database
+integrity checks passed, all 11 tables matched, and seeded inventory
+values were unchanged. The active application database was not used.
 
-verification report for the selected demonstration database.
+Evidence source:
+https://github.com/SE-Electronics-Inventory/H9_Electronics_Store_Inventory/pull/106
+
+Status: isolated recovery execution documented in the PR.
+The automated recovery tests also passed within the recorded 158-test suite.
+
+The PR execution summary is available; a separate JSON execution report
+has not been supplied for this review.
 
 
 
