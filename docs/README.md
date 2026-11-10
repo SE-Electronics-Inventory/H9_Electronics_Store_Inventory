@@ -36,8 +36,8 @@ These results cover the combined unit and integration suite.
 
 * [Swara's Authentication and Security RTM](../Phase_3/Swara_Security_RTM.md)
 * [Swara's Implementation and Design Deviation Notes](../Phase_3/Swara_Implementation_Notes.md)
-* - [Team Test Execution Matrix](../Phase_3/Team_Test_Execution_Matrix.md)
-* - [Validation Specification Update](../Phase_3/Validation_Spec_Update.md)
+* [Team Test Execution Matrix](../Phase_3/Team_Test_Execution_Matrix.md)
+* [Validation Specification Update](../Phase_3/Validation_Spec_Update.md)
 
 Swara's RTM covers her assigned requirements, not the complete project.
 
