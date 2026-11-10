@@ -266,9 +266,13 @@ files, stories, tests and original PRs.
 
 
 
-The team must complete or consolidate mappings for the remaining
+The [Team Test Execution Matrix](Team_Test_Execution_Matrix.md)
+maps all 30 requirements to automated checks, available evidence
+and outstanding validation actions.
 
-requirements before declaring full requirement coverage.
+This establishes a consolidated mapping, not full acceptance of
+every requirement. Team review and the listed pending checks
+remain outstanding.
 
 
 
