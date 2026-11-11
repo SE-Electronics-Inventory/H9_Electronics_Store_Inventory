@@ -8,8 +8,6 @@
 | System Test Report | 3 marks | [System report](../docs/02_System_Test_Report.md) |
 | Code and Branch Coverage Report | 3 marks | [Coverage report](../docs/03_Code_and_Branch_Coverage_Report.md) |
 
-Marks are rubric allocations, not marks awarded. Reports distinguish observed
-results from pending acceptance. No faculty approval is claimed.
 
 - [All submission documents](../docs/README.md)
 - [Team requirement matrix](Team_Test_Execution_Matrix.md)
