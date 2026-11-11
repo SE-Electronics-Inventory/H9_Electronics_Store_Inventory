@@ -112,4 +112,21 @@ Planned security validation covers:
 
 ---
 
-*Phase 1 establishes the requirements, architecture, design, testing strategy, and validation criteria for the Electronics Store Inventory Management System. Implementation and execution of the planned tests will follow in subsequent phases.*
+## Phase 2 & Phase 3 Deliverables
+
+### Phase 2: Agile Sprint Execution & Non-Functional Validation
+* [Sprint Backlog, Epics, Story Points & Subtasks](Phase_2/)
+* [Sprint 1 & Sprint 2 Burndown Charts](Phase_2/)
+* [Sprint 1 & Sprint 2 Working Product Demo Videos](Phase_2/)
+* [Non-Functional Validation Reports (NFR-01 to NFR-08)](Phase_2/)
+
+### Phase 3: Testing & Quality Assurance (10 Marks)
+* [Phase 3 Master Index](Phase_3/README.md)
+* **[01. Unit Test Report (4 Marks)](Phase_3/01_Unit_Test_Report.md)**: 52 isolated unit tests across models, forms, validation, and role decorators.
+* **[02. System Test Report (3 Marks)](Phase_3/02_System_Test_Report.md)**: End-to-end integration across all 16 FRs, 8 NFRs, and 6 SRs (158 passed tests).
+* **[03. Code & Branch Coverage Report (3 Marks)](Phase_3/03_Code_and_Branch_Coverage_Report.md)**: 89% statement coverage, 78% branch coverage, 88% overall coverage.
+* [Automated Test & Coverage Evidence](Phase_3/Test_Evidence/README.md)
+
+---
+
+*Team H9 — Electronics Store Inventory Management System (ESIMS) — PES University*

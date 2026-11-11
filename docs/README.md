@@ -15,7 +15,14 @@ Original test cases describe the planning baseline; their "Not tested"
 
 statuses must be read alongside subsequent execution evidence.
 
-## Automated Test and Coverage Reports
+## Phase 3 Deliverables (10 Marks)
+
+* [Phase 3 Master Index](../Phase_3/README.md)
+* [Unit Test Report (4 Marks)](../Phase_3/01_Unit_Test_Report.md)
+* [System Test Report (3 Marks)](../Phase_3/02_System_Test_Report.md)
+* [Code & Branch Coverage Report (3 Marks)](../Phase_3/03_Code_and_Branch_Coverage_Report.md)
+
+## Automated Test and Coverage Evidence
 
 * [Test approach, results and limitations](../Phase_3/Test_Evidence/README.md)
 * [Coverage summary](../Phase_3/Test_Evidence/coverage_summary.txt)
