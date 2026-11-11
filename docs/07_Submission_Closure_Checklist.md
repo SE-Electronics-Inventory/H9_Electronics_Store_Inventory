@@ -34,8 +34,8 @@ Audit baseline: c8b3812290e99203122e0316b0ae2f247707fcc3, reviewed 11 November 2
 
 ## Part 3 - Execution still outstanding
 
-- Unit: optionally retain a dedicated verbose run of the seven actual helper tests;
-  current unit report explicitly derives their outcome from the historical combined run.
+- Unit: completed dedicated verbose execution of seven helper tests at bcb4ccd;
+  all passed in 0.002 seconds. Log and runtime metadata are linked from the unit report.
 - Ahana: availability observations/report over the agreed full window.
 - Ahana: unassisted new-user task results and feedback.
 - Shriya: actual Firefox execution and exact Chrome/Edge versions/evidence.

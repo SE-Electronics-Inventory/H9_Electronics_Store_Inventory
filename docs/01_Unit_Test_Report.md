@@ -1,8 +1,8 @@
 # Unit Test Report
 
 Report revision: 1.1, prepared 11 November 2026. Team H9.
-Recorded execution: 9 November 2026, Swara Potdar.
-Tested application commit: `b1e3590fd85014ed06d8f0443a03fd04f20a5695`.
+Historical combined execution: 9 November 2026, Swara Potdar.
+Historical combined-run application commit: `b1e3590fd85014ed06d8f0443a03fd04f20a5695`.
 Environment: Windows, Python 3.11.9, Django 5.2.18, Coverage.py 7.17.2.
 Document status: final submission, 11 November 2026.
 Results and limitations below describe the available execution evidence.
@@ -18,8 +18,11 @@ in `nfr_tools.test_availability.AvailabilityCalculationTests`. They call calcula
 functions with synthetic inputs and do not require a live application server.
 
 These seven tests passed as members of the recorded 158-test combined run.
-A separate unit-only execution log has not yet been retained. The earlier assertion
-of 52 isolated unit tests is withdrawn: no verified classification/log supports it.
+A subsequent dedicated execution at commit `bcb4ccd` passed all seven tests in
+0.002 seconds, with no failures or errors. Django skipped the unused database and
+reported no system-check issues. Its timestamp and runtime versions are retained
+in unit_run_environment.txt. The earlier assertion of 52 isolated unit tests is
+withdrawn: no verified classification/log supports it.
 This selection is not a claim that no other unit/component tests exist.
 
 ## 2. Test design and execution
@@ -31,13 +34,13 @@ Inputs and assertions are executable in
 
 | ID | Actual test method | Expected result verified by assertions | Result |
 |---|---|---|---|
-| U01 | `test_successful_checks_report_full_availability` | 100% for a fully successful synthetic window. | Passed within combined run |
-| U02 | `test_failure_to_recovery_uses_conservative_previous_success_bound` | Conservative outage bounds produce 300 s downtime and 50% availability. | Passed within combined run |
-| U03 | `test_first_failed_poll_counts_from_test_start` | Initial failure is counted from test start: 240 s downtime and 60% availability. | Passed within combined run |
-| U04 | `test_last_failed_poll_counts_to_test_end` | Unrecovered final failure is counted to test end: 300 s downtime. | Passed within combined run |
-| U05 | `test_planned_maintenance_is_excluded_from_duration_and_downtime` | Maintenance is excluded: 480 s eligible, 180 s downtime, 62.5% availability. | Passed within combined run |
-| U06 | `test_timezone_is_required_for_maintenance_dates` | Naive timestamps raise ValueError. | Passed within combined run |
-| U07 | `test_empty_sample_set_does_not_claim_full_availability` | No samples return undetermined availability, not 100%. | Passed within combined run |
+| U01 | `test_successful_checks_report_full_availability` | 100% for a fully successful synthetic window. | Passed: dedicated run and historical combined run |
+| U02 | `test_failure_to_recovery_uses_conservative_previous_success_bound` | Conservative outage bounds produce 300 s downtime and 50% availability. | Passed: dedicated run and historical combined run |
+| U03 | `test_first_failed_poll_counts_from_test_start` | Initial failure is counted from test start: 240 s downtime and 60% availability. | Passed: dedicated run and historical combined run |
+| U04 | `test_last_failed_poll_counts_to_test_end` | Unrecovered final failure is counted to test end: 300 s downtime. | Passed: dedicated run and historical combined run |
+| U05 | `test_planned_maintenance_is_excluded_from_duration_and_downtime` | Maintenance is excluded: 480 s eligible, 180 s downtime, 62.5% availability. | Passed: dedicated run and historical combined run |
+| U06 | `test_timezone_is_required_for_maintenance_dates` | Naive timestamps raise ValueError. | Passed: dedicated run and historical combined run |
+| U07 | `test_empty_sample_set_does_not_claim_full_availability` | No samples return undetermined availability, not 100%. | Passed: dedicated run and historical combined run |
 
 ## 3. Other component tests and exclusions
 
@@ -64,16 +67,19 @@ this report's historical results to a new date without retaining the new output.
 
 ## 5. Results, limitations and defects
 
-The seven mapped assertions passed in the combined run. This is not proof of live
+The seven selected tests passed in both the dedicated and combined runs. This is not proof of live
 99% uptime: synthetic calculation correctness and measured service availability
 are different claims. No new defect-discovery history is asserted in this report.
 Use real issue/commit references for any future defect entries.
 
 ## 6. Evidence and conclusion
 
+- [Dedicated seven-test execution log](evidence/unit_test_execution.txt)
+- [Dedicated execution timestamp, runtime and commit](evidence/unit_run_environment.txt)
 - [158-test execution evidence](evidence/tests_passed.png)
 - [Recorded environment and commit](evidence/environment.txt)
 - [Full requirement matrix](../Phase_3/Team_Test_Execution_Matrix.md)
 
-Unit calculation evidence is available within the combined run. A dedicated log is
-recommended for direct evaluator review. Final approval/marks are not claimed.
+Dedicated unit execution evidence is now retained for the seven selected tests.
+This does not measure unit-only code coverage or live service uptime; the existing
+coverage percentages still describe the historical combined suite.
