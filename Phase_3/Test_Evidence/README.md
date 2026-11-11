@@ -66,7 +66,7 @@ Test files and migrations are excluded from the reported coverage.
 
 - coverage_totals.png: coverage summary screenshot.
 
-- htmlcov/index.html: interactive coverage report.
+- [Restored HTML coverage report](../../docs/evidence/htmlcov/index.html): historical interactive coverage report.
 
 - environment.txt: runtime versions and tested commit.
 
@@ -87,4 +87,3 @@ Passing tests and coverage do not establish completion of
 real-browser, new-user usability or controlled uptime validation.
 
 Those require separate execution evidence.
-

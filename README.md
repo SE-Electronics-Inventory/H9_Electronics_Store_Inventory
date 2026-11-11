@@ -1,6 +1,6 @@
 # Electronics Store Inventory Management System
 
-A web-based **Electronics Store Inventory Management System** developed using **Python and Django**.  
+A web-based **Electronics Store Inventory Management System** developed using **Python and Django**.
 The system is designed to help electronics stores maintain component records, monitor stock levels, check availability, and generate inventory reports.
 
 ### Team
@@ -27,7 +27,7 @@ Phase 1 focuses on **requirements, architecture & design, test planning, and val
 - Validate user input and handle errors
 - Maintain persistent inventory data
 
-The system is intended to provide a centralized, role-controlled and testable approach to inventory management. :contentReference[oaicite:2]{index=2}
+The system is intended to provide a centralized, role-controlled and testable approach to inventory management.
 
 ## User Roles
 
@@ -38,7 +38,7 @@ The system is intended to provide a centralized, role-controlled and testable ap
 | **Store Manager** | Monitors dashboard, stock levels, availability, and reports |
 | **QA / Evaluator** | Validates the system against requirements and acceptance criteria |
 
-The first three roles are operational users, while QA / Evaluator is an external evaluation role. :contentReference[oaicite:3]{index=3}
+The first three roles are operational users, while QA / Evaluator is an external evaluation role.
 
 ## Technology Stack
 
@@ -47,7 +47,7 @@ The first three roles are operational users, while QA / Evaluator is an external
 - **Database:** SQLite for development; PostgreSQL/MySQL supported for larger deployment
 - **Frontend:** HTML, CSS, JavaScript
 - **Development Tools:** VS Code, Git
-- **Client:** Modern web browsers such as Chrome, Edge, and Firefox :contentReference[oaicite:4]{index=4}
+- **Client:** Modern web browsers such as Chrome, Edge, and Firefox
 
 ## Core Features
 
@@ -62,7 +62,7 @@ The first three roles are operational users, while QA / Evaluator is an external
 - Input validation
 - Persistent database storage
 - Inventory change tracking
-- Error handling :contentReference[oaicite:5]{index=5}
+- Error handling
 
 ## Phase 1 Documentation
 
@@ -75,7 +75,7 @@ The Phase 1 deliverables are organized as follows:
 | `03_COMPLETE_TEST_CASES_15.pdf` | Functional, non-functional, and security test cases |
 | `04_COMPLETE_ARCHITECTURE_AND_DESIGN.pdf` | System architecture, UML use cases, and design specifications |
 
-The documents use common requirement, design, and test references such as **ESIM-F-xxx**, **ESIM-NF-xxx**, **ESIM-SR-xxx**, **DS-xx**, and **TC-xx** for traceability. :contentReference[oaicite:6]{index=6}
+The documents use common requirement, design, and test references such as **ESIM-F-xxx**, **ESIM-NF-xxx**, **ESIM-SR-xxx**, **DS-xx**, and **TC-xx** for traceability.
 
 ## Testing
 
@@ -95,7 +95,7 @@ Key areas include:
 - Database recoverability
 - Security and access-control testing
 
-The planned performance criteria include **90% of normal-load inventory requests completing within 2 seconds** and support for at least **1000 component records** in the test database. :contentReference[oaicite:7]{index=7}
+The planned performance criteria include **90% of normal-load inventory requests completing within 2 seconds** and support for at least **1000 component records** in the test database.
 
 ### Security Testing
 
@@ -107,26 +107,21 @@ Planned security validation covers:
 - CSRF protection
 - Malicious or invalid input
 - Session management
-- Access control for inventory-changing operations :contentReference[oaicite:8]{index=8}
+- Access control for inventory-changing operations
 
 
 ---
 
-## Phase 2 & Phase 3 Deliverables
+## Current Submission Index
 
-### Phase 2: Agile Sprint Execution & Non-Functional Validation
-* [Sprint Backlog, Epics, Story Points & Subtasks](Phase_2/)
-* [Sprint 1 & Sprint 2 Burndown Charts](Phase_2/)
-* [Sprint 1 & Sprint 2 Working Product Demo Videos](Phase_2/)
-* [Non-Functional Validation Reports (NFR-01 to NFR-08)](Phase_2/)
+Start with [docs/README.md](docs/README.md) for revised specifications, the three
+formal reports, exact execution evidence, videos and outstanding closure actions.
 
-### Phase 3: Testing & Quality Assurance (10 Marks)
-* [Phase 3 Master Index](Phase_3/README.md)
-* **[01. Unit Test Report (4 Marks)](Phase_3/01_Unit_Test_Report.md)**: 52 isolated unit tests across models, forms, validation, and role decorators.
-* **[02. System Test Report (3 Marks)](Phase_3/02_System_Test_Report.md)**: End-to-end integration across all 16 FRs, 8 NFRs, and 6 SRs (158 passed tests).
-* **[03. Code & Branch Coverage Report (3 Marks)](Phase_3/03_Code_and_Branch_Coverage_Report.md)**: 89% statement coverage, 78% branch coverage, 88% overall coverage.
-* [Automated Test & Coverage Evidence](Phase_3/Test_Evidence/README.md)
+- [Unit Test Report](docs/01_Unit_Test_Report.md)
+- [System Test Report](docs/02_System_Test_Report.md)
+- [Code and Branch Coverage Report](docs/03_Code_and_Branch_Coverage_Report.md)
+- [Sprint 1](Phase_2/Sprint_1_Demo.mp4)
+- [Sprint 2](Phase_2/Sprint_2_Demo.mp4)
 
----
-
-*Team H9 — Electronics Store Inventory Management System (ESIMS) — PES University*
+Recorded automated baseline: 158 tests passed; 89% statement, 78% branch and 88%
+combined coverage. Manual acceptance status is qualified in the system report.
