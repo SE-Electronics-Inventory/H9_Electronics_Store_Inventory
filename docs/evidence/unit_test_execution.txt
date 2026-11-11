@@ -1,0 +1,15 @@
+test_successful_checks_report_full_availability (nfr_tools.test_availability.AvailabilityCalculationTests.test_successful_checks_report_full_availability) ... ok
+test_failure_to_recovery_uses_conservative_previous_success_bound (nfr_tools.test_availability.AvailabilityCalculationTests.test_failure_to_recovery_uses_conservative_previous_success_bound) ... ok
+test_first_failed_poll_counts_from_test_start (nfr_tools.test_availability.AvailabilityCalculationTests.test_first_failed_poll_counts_from_test_start) ... ok
+test_last_failed_poll_counts_to_test_end (nfr_tools.test_availability.AvailabilityCalculationTests.test_last_failed_poll_counts_to_test_end) ... ok
+test_planned_maintenance_is_excluded_from_duration_and_downtime (nfr_tools.test_availability.AvailabilityCalculationTests.test_planned_maintenance_is_excluded_from_duration_and_downtime) ... ok
+test_timezone_is_required_for_maintenance_dates (nfr_tools.test_availability.AvailabilityCalculationTests.test_timezone_is_required_for_maintenance_dates) ... ok
+test_empty_sample_set_does_not_claim_full_availability (nfr_tools.test_availability.AvailabilityCalculationTests.test_empty_sample_set_does_not_claim_full_availability) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+OK
+Found 7 test(s).
+Skipping setup of unused database(s): default.
+System check identified no issues (0 silenced).
