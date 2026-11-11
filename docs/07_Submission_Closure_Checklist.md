@@ -37,7 +37,7 @@ Audit baseline: c8b3812290e99203122e0316b0ae2f247707fcc3, reviewed 11 November 2
 - Unit: completed dedicated verbose execution of seven helper tests at bcb4ccd;
   all passed in 0.002 seconds. Log and runtime metadata are linked from the unit report.
 - Ahana: availability observations/report over the agreed full window.
-- Ahana: unassisted new-user task results and feedback.
+- Completed: P01 four-task usability session facilitated by Swara; [results and feedback](evidence/usability/README.md).
 - Firefox: completed scoped workflows; [execution evidence](evidence/firefox/README.md).
 - Shriya: exact Chrome/Edge versions/evidence.
 - Team: planned security scan or formally reviewed approach change; likewise explain

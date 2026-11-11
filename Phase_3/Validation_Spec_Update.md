@@ -354,19 +354,12 @@ Until reviewed, the 99% availability target is not established here.
 
 ### Usability
 
+Swara reports P01, a first-time non-developer user, completed sign-in, search, restocking interpretation and sign-out without task-specific help on 11 November 2026. Feedback: "very easy to understand and use". Scoped four-task session; [execution record](../docs/evidence/usability/README.md).
 
-
-The previously reviewed usability document states that real-user
-
-evidence is pending.
-
-
-
-Team action: conduct or supply the unassisted participant session
-
-and record actual outcomes.
-
-
+The facilitator supplied project-purpose context only. P01 identified stock of 5
+and correctly concluded restocking was needed against the existing minimum of 10.
+This record supports the listed tasks for this participant, not general population
+or completion-time claims.
 
 ### Browser compatibility
 

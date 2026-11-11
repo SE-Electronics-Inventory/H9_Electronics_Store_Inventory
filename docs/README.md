@@ -51,3 +51,7 @@ proof of complete system acceptance. No marks awarded or faculty approval are cl
 Firefox 147.0.3 on Ubuntu/Linux in VMware: Swara completed login, empty inventory, add, matching/nonmatching search, low-stock display, CSV export and logout/protected-access checks on 11 November 2026.
 
 [Execution summary, screenshots and CSV](evidence/firefox/README.md).
+
+## Completed new-user usability session
+
+Swara reports P01, a first-time non-developer user, completed sign-in, search, restocking interpretation and sign-out without task-specific help on 11 November 2026. Feedback: "very easy to understand and use". Scoped four-task session; [execution record](evidence/usability/README.md).

@@ -1,6 +1,11 @@
 # NFR-05 new-user usability test
 
-**Status: real-user evidence pending.** A developer must not coach the participant, answer task questions, or complete tasks for them. Do not fill in participant observations, task outcomes, success rates, or feedback before the session.
+**Execution update, 11 November 2026:** Swara reports P01, a first-time non-developer user, completed sign-in, search, restocking interpretation and sign-out without task-specific help on 11 November 2026. Feedback: "very easy to understand and use". Scoped four-task session; [execution record](../docs/evidence/usability/README.md).
+
+The procedure below is retained as the original broader test plan. The linked
+execution record identifies the tasks actually observed.
+
+**Procedure guidance:** A developer must not coach the participant, answer task questions, or complete tasks for them. Do not fill in participant observations, task outcomes, success rates, or feedback before the session.
 
 ## Setup
 
