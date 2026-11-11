@@ -10,9 +10,9 @@
 | Test Cases | [Updated execution mapping](../Phase_3/Team_Test_Execution_Matrix.md) | [Original cases](../Phase_1/03_COMPLETE_TEST_CASES_15.pdf) |
 
 Each revision explicitly supplements its original document; original diagrams and
-unchanged sections are retained. Revisions describe actual behaviour and pending
-review, not fabricated approvals. If faculty requires single consolidated PDFs,
-combine the reviewed revision with its original before submission.
+unchanged sections are retained. These are final submission revisions describing
+actual behaviour, implementation differences and remaining validation gaps. If
+faculty requires single consolidated PDFs, combine each revision with its original.
 
 ## Part 2 - Agile and Sprint Evidence
 

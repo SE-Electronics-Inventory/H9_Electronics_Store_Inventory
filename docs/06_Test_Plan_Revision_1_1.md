@@ -1,6 +1,6 @@
 # Software Test Plan Revision 1.1
 
-Team H9. Prepared 11 November 2026. Status: revised execution approach for team review.
+Team H9. Prepared 11 November 2026. Status: final submission revision documenting the execution approach.
 Read with the [complete STP](../Phase_1/02_Software_Test_Plan_STP.pdf), retaining its
 introduction, sections 3/4/5, security section 5.1, environment, schedule, roles,
 risks, suspension/resumption and approvals. The older short extract is historical.
@@ -54,12 +54,13 @@ Reports are physically in docs/:
 - [System Test Report](02_System_Test_Report.md)
 - [Code and Branch Coverage Report](03_Code_and_Branch_Coverage_Report.md)
 
-## 6. Entry, exit, defects and approval
+## 6. Entry, exit, defects and submission status
 
 Retain original entry/exit criteria. Full acceptance is not achieved merely by a
 passing regression run: planned cases need results, high-priority failures need
 resolution and requirement deviations need review. Deferred cases remain pending,
 with owner/reason/target. Review actual issue records before claiming zero defects.
 
-Team review: pending. Faculty approval: not recorded. Development freeze must identify
-an agreed implementation commit/date; do not declare a freeze on behalf of the team.
+This is the final submission version of the test-plan supplement. It does not
+change pending tests to passed. A development freeze, if declared, must identify
+the actual implementation commit and date.

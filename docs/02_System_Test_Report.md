@@ -4,7 +4,8 @@ Report revision: 1.1, prepared 11 November 2026. Team H9.
 Recorded execution: 9 November 2026, Swara Potdar.
 Tested application commit: `b1e3590fd85014ed06d8f0443a03fd04f20a5695`.
 Environment: Windows, Python 3.11.9, Django 5.2.18, Coverage.py 7.17.2.
-Review status: corrected evidence report for team review; faculty approval is not claimed.
+Document status: final submission, 11 November 2026.
+Results and limitations below describe the available execution evidence.
 
 The current application source at c8b3812 matches the recorded application source
 (no differences under src/); this does not change the historical execution date.

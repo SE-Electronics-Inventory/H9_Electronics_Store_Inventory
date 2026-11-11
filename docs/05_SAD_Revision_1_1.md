@@ -1,10 +1,10 @@
 # Architecture and Design Revision 1.1
 
-Team H9. Prepared 11 November 2026. Status: implementation-alignment revision for review.
+Team H9. Prepared 11 November 2026. Status: final submission revision documenting the implemented system.
 Read with the [original SAD](../Phase_1/04_Architecture_and_Design_Specification_SAD.pdf),
 which retains the component diagram, descriptions, architectural rationale, security
 architecture, class model and at least two UML sequence diagrams.
-The documents together form this proposed revision; approval is not assumed.
+The documents together form the submission revision; remaining differences are explicit.
 
 ## 1. Architecture and component realization
 
@@ -66,10 +66,10 @@ Password storage uses Django hashers; forms use CSRF tokens; unsafe raw SQL/esca
 bypasses must not be introduced. Selected secret-free logging tests are not proof
 of complete authentication-event auditing or log redaction infrastructure.
 
-## 5. Open design decisions
+## 5. Remaining design differences
 
 See [SRS revision](04_SRS_Revision_1_1.md) for role/metric decisions and
 [implementation notes](../Phase_3/Swara_Implementation_Notes.md) for history.
-Review authentication-event logging, original pagination/indexing intentions and
-production deployment assumptions before claiming conformance. Record accepted
-changes or implement missing requirements; no approval is manufactured here.
+Authentication-event logging, original pagination/indexing intentions and
+production deployment assumptions remain conformance limitations unless separately
+implemented and verified. This revision does not represent those items as completed.
