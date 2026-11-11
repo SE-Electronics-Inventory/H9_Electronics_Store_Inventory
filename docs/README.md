@@ -45,3 +45,9 @@ Owner PR reviews and final freeze must be checked in the actual GitHub records.
 
 See [closure checklist](07_Submission_Closure_Checklist.md). Report presence is not
 proof of complete system acceptance. No marks awarded or faculty approval are claimed.
+
+## Completed Firefox checks
+
+Firefox 147.0.3 on Ubuntu/Linux in VMware: Swara completed login, empty inventory, add, matching/nonmatching search, low-stock display, CSV export and logout/protected-access checks on 11 November 2026.
+
+[Execution summary, screenshots and CSV](evidence/firefox/README.md).

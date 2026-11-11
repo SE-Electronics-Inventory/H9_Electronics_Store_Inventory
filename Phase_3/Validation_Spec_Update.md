@@ -386,15 +386,15 @@ Firefox User-Agent strings. They check selected server responses,
 HTML content and CSV headers; they do not launch browser engines
 or verify visual rendering.
 
-Actual Firefox browser testing remains pending.
+Firefox 147.0.3 on Ubuntu/Linux in VMware: Swara completed login, empty inventory, add, matching/nonmatching search, low-stock display, CSV export and logout/protected-access checks on 11 November 2026.
+[Completed Firefox checks](../docs/evidence/firefox/README.md).
 
 Status: partially validated. NFR-07 / TC-COMP-01 must not yet be
 recorded as fully passed.
 
 Follow-up owner: Shriya.
-Complete Firefox testing, record exact browser versions and actual
-results, and revise the compatibility report's overall status and
-matrix to distinguish manual browser results from test-client checks.
+Supply exact Chrome/Edge versions and browser-specific records. Firefox results
+are recorded for the workflows listed in the linked execution evidence.
 
 
 ### Backup and recovery

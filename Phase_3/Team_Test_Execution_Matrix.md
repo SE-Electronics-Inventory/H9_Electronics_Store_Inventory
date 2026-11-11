@@ -83,7 +83,7 @@ Full original procedures remain in the Phase 1 test-case document.
 | NFR-04 Availability | TC-REL-02 | nfr_tools/test_availability.py; PR #108 | Monitor tests passed. Actual agreed-duration availability measurement remains pending; 99% achievement is not established. Owner: Ahana. |
 | NFR-05 Usability | TC-UX-01 | inventory/test_usability.py; PR #107 | Automated UI-response checks passed. Unassisted new-user session and participant feedback remain pending. Owner: Ahana. |
 | NFR-06 Modularity | Code review | Phase_2/NFR06_Django_Modularity_Review.md | Repository contains a documented modularity review. This is review evidence, not a measured automated-test result. |
-| NFR-07 Browser compatibility | TC-COMP-01 | inventory/test_browser_compatibility.py; Phase_2/NFR07_Browser_Compatibility_Report.md; PR #112 | Partial. User-Agent-based server checks passed. Shriya reports Chrome/Edge manual checks; exact versions and supporting records need confirmation. Actual Firefox testing remains pending. Owner: Shriya. |
+| NFR-07 Browser compatibility | TC-COMP-01 | inventory/test_browser_compatibility.py; Phase_2/NFR07_Browser_Compatibility_Report.md; PR #112 | Partial. User-Agent-based server checks passed. Shriya reports Chrome/Edge manual checks; exact versions and supporting records need confirmation. Firefox 147.0.3 on Ubuntu/Linux in VMware: Swara completed login, empty inventory, add, matching/nonmatching search, low-stock display, CSV export and logout/protected-access checks on 11 November 2026. [Execution evidence](../docs/evidence/firefox/README.md). |
 | NFR-08 Recovery | TC-REC-01 | nfr_tools/test_database_recovery.py; PR #106 | Automated tests passed. PR documents successful isolated backup/restore, integrity checks and all 11 tables matching. Separate execution JSON has not been supplied for this review. |
 
 
@@ -151,9 +151,9 @@ Swara's combined regression run. They are separate executions.
 
 - Ahana: conduct and document the unassisted new-user usability session.
 
-- Shriya: complete Firefox testing and clarify Chrome/Edge evidence.
+- Firefox completed-workflow evidence is linked above; Shriya to clarify Chrome/Edge evidence.
 
-- Shriya: correct the browser report so pending checks are not labelled passed.
+- Browser evidence distinguishes real Firefox execution from User-Agent-based server checks.
 
 - Team: reconcile dashboard metrics, role access and other documented design differences.
 
