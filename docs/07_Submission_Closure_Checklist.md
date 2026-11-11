@@ -38,7 +38,8 @@ Audit baseline: c8b3812290e99203122e0316b0ae2f247707fcc3, reviewed 11 November 2
   all passed in 0.002 seconds. Log and runtime metadata are linked from the unit report.
 - Ahana: availability observations/report over the agreed full window.
 - Ahana: unassisted new-user task results and feedback.
-- Shriya: actual Firefox execution and exact Chrome/Edge versions/evidence.
+- Firefox: completed scoped workflows; [execution evidence](evidence/firefox/README.md).
+- Shriya: exact Chrome/Edge versions/evidence.
 - Team: planned security scan or formally reviewed approach change; likewise explain
   client performance tests versus planned load tools and browser tests versus Selenium.
 - Team: restart persistence and any remaining original manual steps, if not already evidenced.

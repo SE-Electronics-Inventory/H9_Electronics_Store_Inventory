@@ -74,7 +74,7 @@ Automated passed means the named assertions passed at the recorded baseline.
 | NFR-04 Availability | TC-REL-02 | nfr_tools/test_availability.py; PR #108 | Monitor tests passed. Actual agreed-duration availability measurement remains pending; 99% achievement is not established. Owner: Ahana. |
 | NFR-05 Usability | TC-UX-01 | inventory/test_usability.py; PR #107 | Automated UI-response checks passed. Unassisted new-user session and participant feedback remain pending. Owner: Ahana. |
 | NFR-06 Modularity | Code review | Phase_2/NFR06_Django_Modularity_Review.md | Repository contains a documented modularity review. This is review evidence, not a measured automated-test result. |
-| NFR-07 Browser compatibility | TC-COMP-01 | inventory/test_browser_compatibility.py; Phase_2/NFR07_Browser_Compatibility_Report.md; PR #112 | Partial. User-Agent-based server checks passed. Shriya reports Chrome/Edge manual checks; exact versions and supporting records need confirmation. Actual Firefox testing remains pending. Owner: Shriya. |
+| NFR-07 Browser compatibility | TC-COMP-01 | inventory/test_browser_compatibility.py; Phase_2/NFR07_Browser_Compatibility_Report.md; PR #112 | Partial. User-Agent-based server checks passed. Shriya reports Chrome/Edge manual checks; exact versions and supporting records need confirmation. Firefox 147.0.3 on Ubuntu/Linux in VMware: Swara completed login, empty inventory, add, matching/nonmatching search, low-stock display, CSV export and logout/protected-access checks on 11 November 2026. [Execution evidence](evidence/firefox/README.md). |
 | NFR-08 Recovery | TC-REC-01 | nfr_tools/test_database_recovery.py; PR #106 | Automated tests passed. PR documents successful isolated backup/restore, integrity checks and all 11 tables matching. Separate execution JSON has not been supplied for this review. |
 
 
@@ -118,7 +118,7 @@ plan cases and not cross-browser acceptance.
 
 | Item | Owner | Required closure evidence |
 |---|---|---|
-| Actual Firefox workflows; Chrome/Edge version and execution details | Shriya | Browser-specific results, exact versions and supporting captures/logs. |
+| Chrome/Edge version and execution details | Shriya | Browser-specific results, exact versions and supporting captures/logs. |
 | Agreed-duration availability | Ahana | Timestamped observations and availability report for full agreed window. |
 | Unassisted usability | Ahana | Actual participant task outcomes and feedback. |
 | Isolated recovery execution | Ahana | PR #106 documents success; retain JSON output if available. |
