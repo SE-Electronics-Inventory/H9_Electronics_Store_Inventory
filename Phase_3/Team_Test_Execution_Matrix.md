@@ -81,7 +81,7 @@ Full original procedures remain in the Phase 1 test-case document.
 | NFR-02 Scalability | TC-PERF-02 | inventory/test_scalability.py; Phase_2/NFR02_Scalability_Validation.md | Automated passed: operations with 1,000 records and seed-command idempotence. |
 | NFR-03 Reliability | TC-REL-01 | inventory/test_transaction_reliability.py; PR #111 | Automated passed: successful transactions and rollback after simulated failures. |
 | NFR-04 Availability | TC-REL-02 | nfr_tools/test_availability.py; PR #108 | Monitor tests passed. Actual agreed-duration availability measurement remains pending; 99% achievement is not established. Owner: Ahana. |
-| NFR-05 Usability | TC-UX-01 | inventory/test_usability.py; PR #107 | Automated UI-response checks passed. Unassisted new-user session and participant feedback remain pending. Owner: Ahana. |
+| NFR-05 Usability | TC-UX-01 | inventory/test_usability.py; PR #107 | Automated UI-response checks passed. Swara reports P01, a first-time non-developer user, completed sign-in, search, restocking interpretation and sign-out without task-specific help on 11 November 2026. Feedback: "very easy to understand and use". Scoped four-task session; [execution record](../docs/evidence/usability/README.md). |
 | NFR-06 Modularity | Code review | Phase_2/NFR06_Django_Modularity_Review.md | Repository contains a documented modularity review. This is review evidence, not a measured automated-test result. |
 | NFR-07 Browser compatibility | TC-COMP-01 | inventory/test_browser_compatibility.py; Phase_2/NFR07_Browser_Compatibility_Report.md; PR #112 | Partial. User-Agent-based server checks passed. Shriya reports Chrome/Edge manual checks; exact versions and supporting records need confirmation. Firefox 147.0.3 on Ubuntu/Linux in VMware: Swara completed login, empty inventory, add, matching/nonmatching search, low-stock display, CSV export and logout/protected-access checks on 11 November 2026. [Execution evidence](../docs/evidence/firefox/README.md). |
 | NFR-08 Recovery | TC-REC-01 | nfr_tools/test_database_recovery.py; PR #106 | Automated tests passed. PR documents successful isolated backup/restore, integrity checks and all 11 tables matching. Separate execution JSON has not been supplied for this review. |
@@ -149,7 +149,7 @@ Swara's combined regression run. They are separate executions.
 
 - Ahana: provide actual availability observations and the measurement report.
 
-- Ahana: conduct and document the unassisted new-user usability session.
+- Completed: P01 four-task usability session; [facilitator-recorded observations](../docs/evidence/usability/README.md).
 
 - Firefox completed-workflow evidence is linked above; Shriya to clarify Chrome/Edge evidence.
 
