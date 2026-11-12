@@ -143,32 +143,9 @@ Swara's combined regression run. They are separate executions.
 
 
 
-## Remaining Acceptance and Review Actions
-
-
-
-- Ahana: provide actual availability observations and the measurement report.
-
-- Completed: P01 four-task usability session; [facilitator-recorded observations](../docs/evidence/usability/README.md).
-
-- Firefox completed-workflow evidence is linked above; Shriya to clarify Chrome/Edge evidence.
-
-- Browser evidence distinguishes real Firefox execution from User-Agent-based server checks.
-
-- Team: reconcile dashboard metrics, role access and other documented design differences.
-
-- Team: provide the planned security-scan evidence or review and document a change to the test approach.
-
-- Team: reconcile other promised tools/procedures with actual execution.
-
-- Team: map any remaining original manual steps to evidence or explicit pending status.
-
-- Team: review open defects; no claim of zero outstanding defects is made here.
-
-- Team: review this matrix and identify the final implementation baseline.
 
 
 
 These rows map all 30 requirements; they do not mean all 30 are fully
 
-accepted. Final review and outstanding validation remain pending.
+accepted.
